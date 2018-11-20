@@ -4,5 +4,5 @@ description: Allows display of a menu tree from a selected menu item in a field.
 package: Fields
 # core: 8.x
 
-version: '8.x-1.0-alpha1'
+version: '8.x-1.0-alpha3'
 core: 8.x
