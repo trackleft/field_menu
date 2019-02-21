@@ -13,7 +13,7 @@ use Drupal\Core\Field\FieldItemListInterface;
  *   module = "field_menu",
  *   label = @Translation("Menu Tree formatter"),
  *   field_types = {
- *     "field_menu_type"
+ *     "field_menu"
  *   }
  * )
  */

@@ -13,6 +13,9 @@ use Drupal\Core\Form\FormStateInterface;
  *   id = "field_menu_tree_widget",
  *   module = "field_menu",
  *   label = @Translation("Menu Item as tree key"),
+ *   field_types = {
+ *     "field_menu"
+ *   }
  * )
  */
 class TreeWidget extends WidgetBase {
@@ -92,5 +95,6 @@ class TreeWidget extends WidgetBase {
       return;
     }
   }
+
 
 }

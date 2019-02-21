@@ -8,10 +8,10 @@ use Drupal\Core\TypedData\DataDefinition;
 use Drupal\Core\Form\FormStateInterface;
 
 /**
- * Plugin implementation of the 'field_menu_type' field type.
+ * Plugin implementation of the 'field_menu' field type.
  *
  * @FieldType(
- *   id = "field_menu_type",
+ *   id = "field_menu",
  *   label = @Translation("Menu Item"),
  *   module = "field_menu",
  *   description = @Translation("Select a valid Menu item"),
