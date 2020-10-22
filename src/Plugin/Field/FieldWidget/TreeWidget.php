@@ -70,7 +70,7 @@ class TreeWidget extends WidgetBase {
       '#type' => 'number',
       '#title' => t('Max depth'),
       '#default_value' => isset($items[$delta]->max_depth) ? $items[$delta]->max_depth : $this->getSetting('max_depth'),
-      '#description' => t('Maximum derpth of the menu tree (0 is no limit).'),
+      '#description' => t('Maximum depth of the menu tree (0 is no limit).'),
       '#min' => 0,
     ];
 

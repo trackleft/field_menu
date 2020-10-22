@@ -55,7 +55,7 @@ class MenuTreeFormatter extends FormatterBase {
       $tree = $menu_tree_service->transform($tree, $manipulators);
       $render_array = $menu_tree_service->build($tree);
       
-      $markup = drupal_render($render_array);
+      $markup = \Drupal::service('renderer')->render($render_array);
       $menu_title = trim($item->menu_title);
       if($menu_title){
         $markup = '<h2 class="menu-title">' . $menu_title . '</h2>' . $markup;
