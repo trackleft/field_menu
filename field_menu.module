@@ -4,3 +4,18 @@
  * @file
  * A menu tree field using the Field Types API.
  */
+/**
+ * Implements hook_help().
+ */
+function field_menu_help($route_name, RouteMatchInterface $route_match) {
+  switch ($route_name) {
+    // Main module help for the wgc_error_test module.
+    case 'help.page.field_menu':
+      $output = '';
+      $output .= '<h3>' . t('About') . '</h3>';
+      $output .= '<p>' . t('Allows display of a menu tree from a selected menu item in a field. Useful for a custom sitemap') . '</p>';
+      return $output;
+
+    default:
+  }
+}
