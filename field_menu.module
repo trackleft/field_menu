@@ -1,5 +1,5 @@
 <?php
-
+use Drupal\Core\Routing\RouteMatchInterface;
 /**
  * @file
  * A menu tree field using the Field Types API.
@@ -9,13 +9,32 @@
  */
 function field_menu_help($route_name, RouteMatchInterface $route_match) {
   switch ($route_name) {
-    // Main module help for the wgc_error_test module.
     case 'help.page.field_menu':
+      $readme = __DIR__ . '/README.txt';
+      $text = file_get_contents($readme);
       $output = '';
-      $output .= '<h3>' . t('About') . '</h3>';
-      $output .= '<p>' . t('Allows display of a menu tree from a selected menu item in a field. Useful for a custom sitemap') . '</p>';
-      return $output;
 
-    default:
+      // If the Markdown module is installed, use it to render the README.
+      if ($text && \Drupal::moduleHandler()->moduleExists('markdown') === TRUE) {
+        $filter_manager = \Drupal::service('plugin.manager.filter');
+        $settings = \Drupal::configFactory()->get('markdown.settings')->getRawData();
+        $config = ['settings' => $settings];
+        $filter = $filter_manager->createInstance('markdown', $config);
+        $output = $filter->process($text, 'en');
+      }
+      // Else the Markdown module is not installed output the README as text.
+      else if ($text) {
+        $output = '<pre>' . $text . '</pre>';
+      }
+
+      // Add a link to the Drupal.org project.
+      $output .= '<p>';
+      $output .= t('Visit the <a href=":project_link">Field Menu project page</a> on Drupal.org for more information.',[
+        ':project_link' => 'https://www.drupal.org/project/field_menu'
+        ]);
+      $output .= '</p>';
+
+      return $output;
   }
+
 }
