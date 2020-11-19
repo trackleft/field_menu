@@ -55,7 +55,7 @@ class TreeWidget extends WidgetBase {
     $menu_parent = $menu_name  . ':' . $parent;
 
     // This builds a select field with all the menus the current user has access to with a unique key 
-    // (using the same fuctionality as in when the CMS user adds a menu lkink to a node)
+    // (using the same fuctionality as in when the CMS user adds a menu link to a node)
     $element += \Drupal::service('menu.parent_form_selector')->parentSelectElement($menu_parent, $menu_link);
     $element += [
       '#empty_value' => '',
