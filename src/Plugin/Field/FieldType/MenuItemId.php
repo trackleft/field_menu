@@ -12,7 +12,7 @@ use Drupal\Core\Form\FormStateInterface;
  *
  * @FieldType(
  *   id = "field_menu",
- *   label = @Translation("Menu Item"),
+ *   label = @Translation("Menu item"),
  *   module = "field_menu",
  *   description = @Translation("Select a valid Menu item"),
  *   default_widget = "field_menu_tree_widget",
@@ -63,7 +63,7 @@ class MenuItemId extends FieldItemBase {
    */
   public static function propertyDefinitions(FieldStorageDefinitionInterface $field_definition) {
     $properties['menu_title'] = DataDefinition::create('string')->setLabel(t('Title'));
-    $properties['menu_item_key'] = DataDefinition::create('string')->setLabel(t('Menu Item'));
+    $properties['menu_item_key'] = DataDefinition::create('string')->setLabel(t(''));
     $properties['include_root'] = DataDefinition::create('integer')->setLabel(t('Include root'));
     $properties['max_depth'] = DataDefinition::create('integer')->setLabel(t('Max depth'));
 

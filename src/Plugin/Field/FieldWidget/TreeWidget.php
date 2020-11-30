@@ -12,7 +12,7 @@ use Drupal\Core\Form\FormStateInterface;
  * @FieldWidget(
  *   id = "field_menu_tree_widget",
  *   module = "field_menu",
- *   label = @Translation("Menu Item as tree key"),
+ *   label = @Translation("Menu item as tree key"),
  *   field_types = {
  *     "field_menu"
  *   }
@@ -86,7 +86,7 @@ class TreeWidget extends WidgetBase {
   }
 
   /**
-   * Validate the Menu Item Key field.
+   * Validate the Menu item Key field.
    */
   public function validate($element, FormStateInterface $form_state) {
     $menu_item_key = $element['#value'];

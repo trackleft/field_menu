@@ -30,4 +30,5 @@ CONFIGURATION
 
  * Navigate to your chosen entity type, and add a field.
  * Click the add field button
+ * Select the 'Menu item' field type and give your field a Label
  * Set the Field Settings to add the field to the entity type
