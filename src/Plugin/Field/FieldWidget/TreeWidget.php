@@ -38,7 +38,15 @@ class TreeWidget extends WidgetBase {
   public function formElement(FieldItemListInterface $items, $delta, array $element, array &$form, FormStateInterface $form_state) {
     $elements = [];
 
-    $elements['menu_title'] = [
+    // Fist let's group in a fieldset
+    $elements['menu_item_fieldset'] = [
+      '#type' => 'details',
+      '#title' => t('Menu item'),
+      '#description' => t('A menu item to be displayed as a tree of menu links.'),
+      '#open' => TRUE,
+    ];
+
+    $elements['menu_item_fieldset']['menu_title'] = [
       '#type' => 'textfield',
       '#title' => t('Title'),
       '#default_value' => isset($items[$delta]->menu_title) ? $items[$delta]->menu_title : $this->getSetting('menu_title'),
@@ -64,9 +72,11 @@ class TreeWidget extends WidgetBase {
       ],
     ];
     $element['#default_value'] = $menu_key_value;
-    $elements['menu_item_key'] = $element;
+    $element['#description'] = t('Select a menu item from the available menu links');
 
-    $elements['max_depth'] = [
+    $elements['menu_item_fieldset']['menu_item_key'] = $element;
+
+    $elements['menu_item_fieldset']['max_depth'] = [
       '#type' => 'number',
       '#title' => t('Max depth'),
       '#default_value' => isset($items[$delta]->max_depth) ? $items[$delta]->max_depth : $this->getSetting('max_depth'),
@@ -74,7 +84,7 @@ class TreeWidget extends WidgetBase {
       '#min' => 0,
     ];
 
-    $elements['include_root'] = [
+    $elements['menu_item_fieldset']['include_root'] = [
       '#type' => 'checkbox',
       '#title' => t('Include root?'),
       '#description' => t('Include the root item in the tree or just the child elements'),
