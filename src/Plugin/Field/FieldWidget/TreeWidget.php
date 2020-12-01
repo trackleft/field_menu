@@ -77,7 +77,7 @@ class TreeWidget extends WidgetBase {
       ],
     ];
     $element['#default_value'] = $menu_key_value;
-    $element['#description'] = t('Select a menu item from the available menu links');
+    $element['#description'] = $this->t('Select a menu item from the available menu links');
 
     $elements['menu_item_fieldset']['menu_item_key'] = $element;
 
