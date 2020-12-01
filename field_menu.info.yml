@@ -3,5 +3,4 @@ type: module
 description: Allows display of a menu tree from a selected menu item in a field. Useful for a custom sitemap
 package: Fields
 
-version: '8.x-1.0'
 core_version_requirement: ^8 || ^9

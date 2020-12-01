@@ -1,9 +1,12 @@
 <?php
-use Drupal\Core\Routing\RouteMatchInterface;
+
 /**
  * @file
  * A menu tree field using the Field Types API.
  */
+
+use Drupal\Core\Routing\RouteMatchInterface;
+
 /**
  * Implements hook_help().
  */
@@ -23,15 +26,17 @@ function field_menu_help($route_name, RouteMatchInterface $route_match) {
         $output = $filter->process($text, 'en');
       }
       // Else the Markdown module is not installed output the README as text.
-      else if ($text) {
+      elseif ($text) {
         $output = '<pre>' . $text . '</pre>';
       }
 
       // Add a link to the Drupal.org project.
       $output .= '<p>';
-      $output .= t('Visit the <a href=":project_link">Field Menu project page</a> on Drupal.org for more information.',[
-        ':project_link' => 'https://www.drupal.org/project/field_menu'
-        ]);
+      $output .= t('Visit the <a href=":project_link">Field Menu project page</a> on Drupal.org for more information.',
+        [
+          ':project_link' => 'https://www.drupal.org/project/field_menu',
+        ],
+      );
       $output .= '</p>';
 
       return $output;

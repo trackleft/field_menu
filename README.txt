@@ -9,9 +9,12 @@ CONTENTS OF THIS FILE
 INTRODUCTION
 ------------
 
-The Field Menu module provides a field type that allows the selection of a menu tree to display in page.
+The Field Menu module provides a field type that allows the selection
+of a menu tree to display in page.
 
-This is useful if for example you want a really customised sitemap. Simply apply it to a content type or Paragraph entity so you can output your own, dynamic, sitemap page with minimal configuration.
+This is useful if for example you want a really customised sitemap.
+Simply apply it to a content type or Paragraph entity so you can output
+your own, dynamic, sitemap page with minimal configuration.
 
 REQUIREMENTS
 ------------

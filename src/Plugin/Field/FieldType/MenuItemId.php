@@ -5,7 +5,6 @@ namespace Drupal\field_menu\Plugin\Field\FieldType;
 use Drupal\Core\Field\FieldItemBase;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\Core\TypedData\DataDefinition;
-use Drupal\Core\Form\FormStateInterface;
 
 /**
  * Plugin implementation of the 'field_menu' field type.
@@ -21,6 +20,9 @@ use Drupal\Core\Form\FormStateInterface;
  */
 class MenuItemId extends FieldItemBase {
 
+  /**
+   * {@inheritdoc}
+   */
   public static function schema(FieldStorageDefinitionInterface $field_definition) {
     return [
       'columns' => [
@@ -46,7 +48,7 @@ class MenuItemId extends FieldItemBase {
           'size' => 'tiny',
           'not null' => FALSE,
         ],
-      ]
+      ],
     ];
   }
 
@@ -63,7 +65,7 @@ class MenuItemId extends FieldItemBase {
    */
   public static function propertyDefinitions(FieldStorageDefinitionInterface $field_definition) {
     $properties['menu_title'] = DataDefinition::create('string')->setLabel(t('Title'));
-    $properties['menu_item_key'] = DataDefinition::create('string')->setLabel(t(''));
+    $properties['menu_item_key'] = DataDefinition::create('string')->setLabel('');
     $properties['include_root'] = DataDefinition::create('integer')->setLabel(t('Include root'));
     $properties['max_depth'] = DataDefinition::create('integer')->setLabel(t('Max depth'));
 

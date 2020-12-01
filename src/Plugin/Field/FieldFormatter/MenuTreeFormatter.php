@@ -4,6 +4,7 @@ namespace Drupal\field_menu\Plugin\Field\FieldFormatter;
 
 use Drupal\Core\Field\FormatterBase;
 use Drupal\Core\Field\FieldItemListInterface;
+use Drupal\Core\Menu\MenuTreeParameters;
 
 /**
  * Plugin implementation of the 'field_menu_tree_formatter' formatter.
@@ -11,7 +12,7 @@ use Drupal\Core\Field\FieldItemListInterface;
  * @FieldFormatter(
  *   id = "field_menu_tree_formatter",
  *   module = "field_menu",
- *   label = @Translation("Menu Tree formatter"),
+ *   label = @Translation("Menu tree formatter"),
  *   field_types = {
  *     "field_menu"
  *   }
@@ -28,19 +29,19 @@ class MenuTreeFormatter extends FormatterBase {
     foreach ($items as $delta => $item) {
 
       $menu_key_value_arr = explode(':', $item->menu_item_key);
-      $menu_name = (isset($menu_key_value_arr[0]) && $menu_key_value_arr[0]) ? $menu_key_value_arr[0]:null;
-      $parent = (isset($menu_key_value_arr[1]) && $menu_key_value_arr[1]) ? $menu_key_value_arr[1]:null;
-      $menu_link = (isset($menu_key_value_arr[2]) && $menu_key_value_arr[2]) ? $menu_key_value_arr[2]:null;
+      $menu_name = (isset($menu_key_value_arr[0]) && $menu_key_value_arr[0]) ? $menu_key_value_arr[0] : NULL;
+      $parent = (isset($menu_key_value_arr[1]) && $menu_key_value_arr[1]) ? $menu_key_value_arr[1] : NULL;
+      $menu_link = (isset($menu_key_value_arr[2]) && $menu_key_value_arr[2]) ? $menu_key_value_arr[2] : NULL;
 
-      $menu_route = ($parent == 'menu_link_content') ?  $parent . ':' . $menu_link:$parent;
+      $menu_route = ($parent == 'menu_link_content') ? $parent . ':' . $menu_link : $parent;
 
-      $menu_parameters = new \Drupal\Core\Menu\MenuTreeParameters();
+      $menu_parameters = new MenuTreeParameters();
       $menu_parameters->setRoot($menu_route);
       $menu_parameters->onlyEnabledLinks();
-      if($item->max_depth > 0){
+      if ($item->max_depth > 0) {
         $menu_parameters->setMaxDepth($item->max_depth);
       }
-      if(!$item->include_root){
+      if (!$item->include_root) {
         $menu_parameters->excludeRoot();
       }
 
@@ -52,12 +53,12 @@ class MenuTreeFormatter extends FormatterBase {
         ['callable' => 'menu.default_tree_manipulators:checkAccess'],
         ['callable' => 'menu.default_tree_manipulators:generateIndexAndSort'],
       ];
+
       $tree = $menu_tree_service->transform($tree, $manipulators);
       $render_array = $menu_tree_service->build($tree);
-      
       $markup = \Drupal::service('renderer')->render($render_array);
       $menu_title = trim($item->menu_title);
-      if($menu_title){
+      if ($menu_title) {
         $markup = '<h2 class="menu-title">' . $menu_title . '</h2>' . $markup;
       }
       $elements[$delta] = ['#markup' => $markup];
