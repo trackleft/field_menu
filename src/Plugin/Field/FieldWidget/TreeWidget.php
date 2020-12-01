@@ -39,17 +39,7 @@ class TreeWidget extends WidgetBase {
    * {@inheritdoc}
    */
   public function formElement(FieldItemListInterface $items, $delta, array $element, array &$form, FormStateInterface $form_state) {
-    $elements = [];
-
-    // Firstly let's group in a fieldset.
-    $elements['menu_item_fieldset'] = [
-      '#type' => 'details',
-      '#title' => $this->t('Menu item'),
-      '#description' => $this->t('A menu item to be displayed as a tree of menu links.'),
-      '#open' => TRUE,
-    ];
-
-    $elements['menu_item_fieldset']['menu_title'] = [
+    $element['menu_title'] = [
       '#type' => 'textfield',
       '#title' => $this->t('Title'),
       '#default_value' => isset($items[$delta]->menu_title) ? $items[$delta]->menu_title : $this->getSetting('menu_title'),
@@ -69,19 +59,17 @@ class TreeWidget extends WidgetBase {
      * has access to with a unique key
      * (uses the same fuctionality as when a user adds a menu link to a node)
      */
-    $element += \Drupal::service('menu.parent_form_selector')->parentSelectElement($menu_parent, $menu_link);
-    $element += [
+    $menu_item_key_field = \Drupal::service('menu.parent_form_selector')->parentSelectElement($menu_parent, $menu_link);
+    $menu_item_key_field['#default_value'] = $menu_key_value;
+    $menu_item_key_field['#description'] = $this->t('Select a menu root item from the available menu links');
+    $menu_item_key_field += [
       '#empty_value' => '',
-      '#element_validate' => [
-        [$this, 'validate'],
-      ],
+      '#title' => $this->t('Root'),
     ];
-    $element['#default_value'] = $menu_key_value;
-    $element['#description'] = $this->t('Select a menu item from the available menu links');
 
-    $elements['menu_item_fieldset']['menu_item_key'] = $element;
+    $element['menu_item_key'] = $menu_item_key_field;
 
-    $elements['menu_item_fieldset']['max_depth'] = [
+    $element['max_depth'] = [
       '#type' => 'number',
       '#title' => $this->t('Max depth'),
       '#default_value' => isset($items[$delta]->max_depth) ? $items[$delta]->max_depth : $this->getSetting('max_depth'),
@@ -89,24 +77,41 @@ class TreeWidget extends WidgetBase {
       '#min' => 0,
     ];
 
-    $elements['menu_item_fieldset']['include_root'] = [
+    $element['include_root'] = [
       '#type' => 'checkbox',
       '#title' => $this->t('Include root?'),
       '#description' => $this->t('Include the root item in the tree or just the child elements'),
       '#default_value' => isset($items[$delta]->include_root) ? $items[$delta]->include_root : $this->getSetting('include_root'),
     ];
 
-    return $elements;
+    $element += [
+      '#element_validate' => [
+        [$this, 'validate'],
+      ],
+    ];
+
+    // If cardinality is 1, ensure a label is output for the field by wrapping
+    // it in a details element.
+    if ($this->fieldDefinition->getFieldStorageDefinition()->getCardinality() == 1) {
+      $element += [
+        '#type' => 'fieldset',
+        '#attributes' => ['class' => ['container']],
+      ];
+    }
+
+    return $element;
   }
 
   /**
    * Validate the Menu item Key field.
    */
   public function validate($element, FormStateInterface $form_state) {
-    $menu_item_key = $element['#value'];
+    $menu_item_key = isset($element['menu_item_key']['#value']) ? $element['menu_item_key']['#value'] : '';
     if (strlen($menu_item_key) == 0) {
-      $form_state->setValueForElement($element, '');
-      return;
+      $form_state->setValueForElement($element['menu_item_key'], '');
+      if ($element['menu_title']['#value']) {
+        $form_state->setError($element['menu_item_key'], $this->t("You must select a menu item if you have set a title"));
+      }
     }
   }
 
