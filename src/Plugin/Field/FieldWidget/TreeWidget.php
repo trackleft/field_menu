@@ -4,8 +4,12 @@ namespace Drupal\field_menu\Plugin\Field\FieldWidget;
 
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Core\Field\FieldItemListInterface;
+use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Field\WidgetBase;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Menu\MenuParentFormSelectorInterface;
+use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Plugin implementation of the 'field_menu_tree_widget' widget.
@@ -19,9 +23,51 @@ use Drupal\Core\Form\FormStateInterface;
  *   }
  * )
  */
-class TreeWidget extends WidgetBase {
+class TreeWidget extends WidgetBase implements ContainerFactoryPluginInterface {
 
   use StringTranslationTrait;
+
+  /**
+   * The parent form selector service.
+   *
+   * @var \Drupal\Core\Menu\MenuParentFormSelectorInterface
+   */
+  protected $menuParentSelector;
+
+  /**
+   * Constructs a TreeWidget object.
+   *
+   * @param string $plugin_id
+   *   The plugin_id for the widget.
+   * @param mixed $plugin_definition
+   *   The plugin implementation definition.
+   * @param \Drupal\Core\Field\FieldDefinitionInterface $field_definition
+   *   The definition of the field to which the widget is associated.
+   * @param array $settings
+   *   The widget settings.
+   * @param array $third_party_settings
+   *   Any third party settings.
+   * @param \Drupal\Core\Menu\MenuParentFormSelectorInterface $menu_parent_selector
+   *   The menu link tree.
+   */
+  public function __construct($plugin_id, $plugin_definition, FieldDefinitionInterface $field_definition, array $settings, array $third_party_settings, MenuParentFormSelectorInterface $menu_parent_selector) {
+    parent::__construct($plugin_id, $plugin_definition, $field_definition, $settings, $third_party_settings);
+    $this->menuParentSelector = $menu_parent_selector;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
+    return new static(
+      $plugin_id,
+      $plugin_definition,
+      $configuration['field_definition'],
+      $configuration['settings'],
+      $configuration['third_party_settings'],
+      $container->get('menu.parent_form_selector')
+    );
+  }
 
   /**
    * {@inheritdoc}
@@ -59,7 +105,7 @@ class TreeWidget extends WidgetBase {
      * has access to with a unique key
      * (uses the same fuctionality as when a user adds a menu link to a node)
      */
-    $menu_item_key_field = \Drupal::service('menu.parent_form_selector')->parentSelectElement($menu_parent, $menu_link);
+    $menu_item_key_field = $this->menuParentSelector->parentSelectElement($menu_parent, $menu_link);
     $menu_item_key_field['#default_value'] = $menu_key_value;
     $menu_item_key_field['#description'] = $this->t('Select a menu root item from the available menu links');
     $menu_item_key_field += [
