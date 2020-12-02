@@ -41,5 +41,18 @@ function field_menu_help($route_name, RouteMatchInterface $route_match) {
 
       return $output;
   }
+}
 
+/**
+ * Implements hook_theme().
+ */
+function field_menu_theme() {
+  return [
+    'field_menu_item' => [
+      'variables' => [
+        'title' => NULL,
+        'tree' => NULL,
+      ],
+    ],
+  ];
 }

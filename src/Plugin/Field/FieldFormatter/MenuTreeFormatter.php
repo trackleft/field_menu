@@ -9,6 +9,7 @@ use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Menu\MenuLinkTreeInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Drupal\Core\Language\LanguageInterface;
 
 /**
  * Plugin implementation of the 'field_menu_tree_formatter' formatter.
@@ -106,13 +107,20 @@ class MenuTreeFormatter extends FormatterBase implements ContainerFactoryPluginI
       ];
 
       $tree = $this->menuLinkTree->transform($tree, $manipulators);
-      $render_array = $this->menuLinkTree->build($tree);
-      $markup = \Drupal::service('renderer')->render($render_array);
+      $tree_render_array = $this->menuLinkTree->build($tree);
+
       $menu_title = trim($item->menu_title);
-      if ($menu_title) {
-        $markup = '<h2 class="menu-title">' . $menu_title . '</h2>' . $markup;
-      }
-      $elements[$delta] = ['#markup' => $markup];
+
+      $elements[$delta] = [
+        '#theme' => 'field_menu_item',
+        '#title' => $menu_title,
+        '#tree' => $tree_render_array,
+        '#cache' => [
+          'contexts' => [
+            'languages:' . LanguageInterface::TYPE_INTERFACE,
+          ],
+        ],
+      ];
     }
 
     return $elements;
