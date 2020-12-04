@@ -35,7 +35,7 @@ function field_menu_help($route_name, RouteMatchInterface $route_match) {
       $output .= t('Visit the <a href=":project_link">Field Menu project page</a> on Drupal.org for more information.',
         [
           ':project_link' => 'https://www.drupal.org/project/field_menu',
-        ],
+        ]
       );
       $output .= '</p>';
 
