@@ -105,7 +105,15 @@ class TreeWidget extends WidgetBase implements ContainerFactoryPluginInterface {
      * has access to with a unique key
      * (uses the same fuctionality as when a user adds a menu link to a node)
      */
-    $menu_item_key_field = $this->menuParentSelector->parentSelectElement($menu_parent, $menu_link);
+
+    // Limit menu list from field settings.
+    $menus = NULL;
+    if (!empty($items->getSetting('menu_type_checkbox'))) {
+      $menu_selected = array_diff($items->getSetting('menu_type_checkbox'), [0]);
+      $menus = empty($menu_selected) ? NULL : $menu_selected;
+    }
+
+    $menu_item_key_field = $this->menuParentSelector->parentSelectElement($menu_parent, $menu_link, $menus);
     $menu_item_key_field['#default_value'] = $menu_key_value;
     $menu_item_key_field['#description'] = $this->t('Select a menu root item from the available menu links');
     $menu_item_key_field += [

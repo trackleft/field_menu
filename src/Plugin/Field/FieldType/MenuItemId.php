@@ -5,6 +5,7 @@ namespace Drupal\field_menu\Plugin\Field\FieldType;
 use Drupal\Core\Field\FieldItemBase;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\Core\TypedData\DataDefinition;
+use Drupal\Core\Form\FormStateInterface;
 
 /**
  * Plugin implementation of the 'field_menu' field type.
@@ -70,6 +71,34 @@ class MenuItemId extends FieldItemBase {
     $properties['max_depth'] = DataDefinition::create('integer')->setLabel(t('Max depth'));
 
     return $properties;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function defaultFieldSettings() {
+    return [
+      'menu_type_checkbox' => [],
+    ] + parent::defaultFieldSettings();
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function fieldSettingsForm(array $form, FormStateInterface $form_state) {
+
+    $element = [];
+    $menu_options = menu_ui_get_menus();
+    $default_value = !empty($this->getSetting('menu_type_checkbox')) ? $this->getSetting('menu_type_checkbox') : [];
+    $element['menu_type_checkbox'] = [
+      '#type' => 'checkboxes',
+      '#title' => $this->t('Available menus'),
+      '#options' => $menu_options,
+      '#default_value' => $default_value,
+      '#description' => $this->t('Select menu to show on select. Leave empty to show all.'),
+    ];
+
+    return $element;
   }
 
 }
