@@ -47,4 +47,3 @@ A Menu item field appering in an entity edit form has the following options:
    if this value is left to the default of 0
  * Include root: only the children of the selected Root item form the tree 
    by default. Here the user has the option to include the root menu link
- 

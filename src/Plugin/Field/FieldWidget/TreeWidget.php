@@ -88,11 +88,11 @@ class TreeWidget extends WidgetBase implements ContainerFactoryPluginInterface {
     $element['menu_title'] = [
       '#type' => 'textfield',
       '#title' => $this->t('Title'),
-      '#default_value' => isset($items[$delta]->menu_title) ? $items[$delta]->menu_title : $this->getSetting('menu_title'),
+      '#default_value' => $items[$delta]->menu_title ?? $this->getSetting('menu_title'),
       '#description' => $this->t('Optional title for the menu.'),
     ];
 
-    $menu_key_value = isset($items[$delta]->menu_item_key) ? $items[$delta]->menu_item_key : $this->getSetting('menu_item_key');
+    $menu_key_value = $items[$delta]->menu_item_key ?? $this->getSetting('menu_item_key');
 
     // Get existing data from field if there is any.
     $menu_key_value_arr = explode(':', $menu_key_value);
@@ -126,7 +126,7 @@ class TreeWidget extends WidgetBase implements ContainerFactoryPluginInterface {
     $element['max_depth'] = [
       '#type' => 'number',
       '#title' => $this->t('Max depth'),
-      '#default_value' => isset($items[$delta]->max_depth) ? $items[$delta]->max_depth : $this->getSetting('max_depth'),
+      '#default_value' => $items[$delta]->max_depth ?? $this->getSetting('max_depth'),
       '#description' => $this->t('Maximum depth of the menu tree (0 is no limit).'),
       '#min' => 0,
     ];
@@ -135,7 +135,7 @@ class TreeWidget extends WidgetBase implements ContainerFactoryPluginInterface {
       '#type' => 'checkbox',
       '#title' => $this->t('Include root?'),
       '#description' => $this->t('Include the root item in the tree or just the child elements'),
-      '#default_value' => isset($items[$delta]->include_root) ? $items[$delta]->include_root : $this->getSetting('include_root'),
+      '#default_value' => $items[$delta]->include_root ?? $this->getSetting('include_root'),
     ];
 
     $element += [
@@ -160,7 +160,7 @@ class TreeWidget extends WidgetBase implements ContainerFactoryPluginInterface {
    * Validate the Menu item Key field.
    */
   public function validate($element, FormStateInterface $form_state) {
-    $menu_item_key = isset($element['menu_item_key']['#value']) ? $element['menu_item_key']['#value'] : '';
+    $menu_item_key = $element['menu_item_key']['#value'] ?? '';
     if (strlen($menu_item_key) == 0) {
       $form_state->setValueForElement($element['menu_item_key'], '');
       if ($element['menu_title']['#value']) {
