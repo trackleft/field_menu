@@ -96,9 +96,9 @@ class TreeWidget extends WidgetBase implements ContainerFactoryPluginInterface {
 
     // Get existing data from field if there is any.
     $menu_key_value_arr = explode(':', $menu_key_value);
-    $menu_name = (isset($menu_key_value_arr[0]) && $menu_key_value_arr[0]) ? $menu_key_value_arr[0] : NULL;
-    $parent = (isset($menu_key_value_arr[1]) && $menu_key_value_arr[1]) ? $menu_key_value_arr[1] : NULL;
-    $menu_link = (isset($menu_key_value_arr[2]) && $menu_key_value_arr[2]) ? $menu_key_value_arr[2] : NULL;
+    $menu_name = $menu_key_value_arr[0] ?? NULL;
+    $parent = $menu_key_value_arr[1] ?? NULL;
+    $menu_link = $menu_key_value_arr[2] ?? NULL;
     $menu_parent = $menu_name . ':' . $parent;
 
     /* Build a select field with all the menus the current user
