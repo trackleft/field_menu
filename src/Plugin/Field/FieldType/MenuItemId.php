@@ -79,6 +79,7 @@ class MenuItemId extends FieldItemBase {
   public static function defaultFieldSettings() {
     return [
       'menu_type_checkbox' => [],
+      'menu_type_checkbox_negate' => FALSE,
     ] + parent::defaultFieldSettings();
   }
 
@@ -89,13 +90,20 @@ class MenuItemId extends FieldItemBase {
 
     $element = [];
     $menu_options = menu_ui_get_menus();
-    $default_value = !empty($this->getSetting('menu_type_checkbox')) ? $this->getSetting('menu_type_checkbox') : [];
+    $default_value = $this->getSetting('menu_type_checkbox') ?? [];
     $element['menu_type_checkbox'] = [
       '#type' => 'checkboxes',
       '#title' => $this->t('Available menus'),
       '#options' => $menu_options,
       '#default_value' => $default_value,
-      '#description' => $this->t('Select menu to show on select. Leave empty to show all.'),
+      '#description' => $this->t('Select menu(s) to make available. Leave empty to show all.'),
+    ];
+    $default_value = $this->getSetting('menu_type_checkbox_negate') ?? FALSE;
+    $element['menu_type_checkbox_negate'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Negate the condition'),
+      '#default_value' => $default_value,
+      '#description' => $this->t('Selected menu(s) will be hidden.'),
     ];
 
     return $element;

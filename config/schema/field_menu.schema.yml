@@ -7,3 +7,6 @@ field_menu.settings:
       label: 'Available menus'
       sequence:
        type: string
+    menu_type_checkbox_negate:
+      type: string
+      label: 'Negate the condition'

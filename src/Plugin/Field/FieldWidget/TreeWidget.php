@@ -109,7 +109,15 @@ class TreeWidget extends WidgetBase implements ContainerFactoryPluginInterface {
     // Limit menu list from field settings.
     $menus = NULL;
     if (!empty($items->getSetting('menu_type_checkbox'))) {
-      $menu_selected = array_diff($items->getSetting('menu_type_checkbox'), [0]);
+      $negate = $items->getSetting('menu_type_checkbox_negate') ?? FALSE;
+      if ($negate) {
+        $menu_options = menu_ui_get_menus();
+        $menu_selected = array_diff($items->getSetting('menu_type_checkbox'), array_keys($menu_options));
+        $menu_selected = array_combine(array_keys($menu_selected), array_keys($menu_selected));
+      }
+      else {
+        $menu_selected = array_diff($items->getSetting('menu_type_checkbox'), [0]);
+      }
       $menus = empty($menu_selected) ? NULL : $menu_selected;
     }
 
