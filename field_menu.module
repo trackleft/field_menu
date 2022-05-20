@@ -56,3 +56,47 @@ function field_menu_theme() {
     ],
   ];
 }
+
+/**
+ * Implements hook_theme_registry_alter().
+ */
+function field_menu_theme_registry_alter(&$theme_registry) {
+  // Add $field_menu_configuration as a variable to the 'menu' theme hook. Set
+  // its default value to be an empty array.
+  $theme_registry['menu']['variables']['field_menu_configuration'] = [];
+}
+
+/**
+ * Implements hook_theme_suggestions_HOOK() for "menu".
+ */
+function field_menu_theme_suggestions_menu(array $variables) {
+  $suggestions = [];
+  // The MenuTreeFormatter plugin's viewElements() method populates this variable.
+  if (!empty($variables['field_menu_configuration'])) {
+    $menu_name = strtr($variables['menu_name'], '-', '_');
+    $suggestions[] = 'menu__' . $menu_name;
+    $suggestions[] = 'field_menu__menu';
+    $suggestions[] = 'field_menu__menu__' . $menu_name;
+    // Add our custom theme suggestion.
+    $config = $variables['field_menu_configuration'];
+    if (!empty($config['suggestion']) && $config['suggestion'] !== $menu_name) {
+      $suggestions[] = 'field_menu__menu';
+      $suggestions[] = 'field_menu__menu__' . $menu_name;
+    }
+    if (!empty($config['providing_entity']) && $config['providing_entity'] instanceof \Drupal\Core\Entity\EntityBase) {
+      $entity = $config['providing_entity'];
+      $type = $entity->getEntityTypeId();
+      $bundle = $entity->bundle();
+      $suggestions[] = 'menu__' . $type . '__field_menu';
+      $suggestions[] = 'menu__' . $type . '__field_menu__' . $menu_name;
+      $suggestions[] = 'menu__' . $type . '__' . $bundle . '__field_menu';
+      $suggestions[] = 'menu__' . $type . '__' . $bundle . '__field_menu__' . $menu_name;
+      if(!empty($config['view_mode'])) {
+        $view_mode = $config['view_mode'];
+        $suggestions[] = 'menu__' . $type . '__' . $bundle . '__' . $view_mode . '__field_menu';
+        $suggestions[] = 'menu__' . $type . '__' . $bundle . '__' . $view_mode . '__field_menu__' . $menu_name;
+      }
+    }
+  }
+  return $suggestions;
+}

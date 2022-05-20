@@ -78,6 +78,9 @@ class MenuTreeFormatter extends FormatterBase implements ContainerFactoryPluginI
    */
   public function viewElements(FieldItemListInterface $items, $langcode) {
     $elements = [];
+    // Set the values here so we can pass them to the menu.
+    $this->configuration['providing_entity'] = $items->getEntity();
+    $this->configuration['view_mode'] = $this->viewMode;
 
     foreach ($items as $delta => $item) {
 
@@ -108,9 +111,17 @@ class MenuTreeFormatter extends FormatterBase implements ContainerFactoryPluginI
 
       $tree = $this->menuLinkTree->transform($tree, $manipulators);
       $tree_render_array = $this->menuLinkTree->build($tree);
-
       $menu_title = trim($item->menu_title);
-
+      if (!empty($tree_render_array['#theme'])) {
+        // Add the configuration for use in menu_block_theme_suggestions_menu().
+        $tree_render_array['#field_menu_configuration'] = $this->configuration;
+        // Set the generated label into the configuration array so it is
+        // propagated to the theme preprocessor and template(s) as needed.
+        $tree_render_array['#field_menu_configuration']['label'] = $menu_title;
+        // Remove the menu name-based suggestion so we can control its precedence
+        // better in menu_block_theme_suggestions_menu().
+        $tree_render_array['#theme'] = 'menu';
+      }
       $elements[$delta] = [
         '#theme' => 'field_menu_item',
         '#title' => $menu_title,
