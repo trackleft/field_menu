@@ -118,8 +118,8 @@ class MenuTreeFormatter extends FormatterBase implements ContainerFactoryPluginI
         // Set the generated label into the configuration array so it is
         // propagated to the theme preprocessor and template(s) as needed.
         $tree_render_array['#field_menu_configuration']['label'] = $menu_title;
-        // Remove the menu name-based suggestion so we can control its precedence
-        // better in menu_block_theme_suggestions_menu().
+        // Remove the menu name-based suggestion so we can control its
+        // precedence better in menu_block_theme_suggestions_menu().
         $tree_render_array['#theme'] = 'menu';
       }
       $elements[$delta] = [
