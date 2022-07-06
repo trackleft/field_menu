@@ -18,7 +18,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  * @FieldWidget(
  *   id = "field_menu_tree_widget",
  *   module = "field_menu",
- *   label = @Translation("Menu item as tree key"),
+ *   label = @Translation("Menu field"),
  *   field_types = {
  *     "field_menu"
  *   }
@@ -99,7 +99,7 @@ class TreeWidget extends WidgetBase implements ContainerFactoryPluginInterface {
       'level' => 2,
       'depth' => 0,
       'expand_all_items' => FALSE,
-      'follow' => 0,
+      'follow' => FALSE,
       'follow_parent' => 'child',
     ] + parent::defaultSettings();
   }
@@ -114,6 +114,7 @@ class TreeWidget extends WidgetBase implements ContainerFactoryPluginInterface {
         array &$form,
         FormStateInterface $form_state
     ) {
+
     $element['menu_title'] = [
       '#type' => 'textfield',
       '#title' => $this->t('Title'),
@@ -133,7 +134,7 @@ class TreeWidget extends WidgetBase implements ContainerFactoryPluginInterface {
     $element['menu'] = [
       '#type' => 'select',
       '#title' => $this->t('Menu'),
-      // '#default_value' => $items[$delta]->menu ?? $this->getSetting('menu'),
+      '#default_value' => $items[$delta]->menu ?? $this->getSetting('menu'),
       '#options' => $menu_options,
       '#description' => $this->t('Select a menu'),
     ];
@@ -157,7 +158,7 @@ class TreeWidget extends WidgetBase implements ContainerFactoryPluginInterface {
     $element['menu_levels']['level'] = [
       '#type' => 'select',
       '#title' => $this->t('Initial visibility level'),
-      '#default_value' => $this->getSetting('level'),
+      '#default_value' => $items[$delta]->level ?? $this->getSetting('level'),
       '#options' => $options,
       '#description' => $this->t('The menu is only visible if the menu link for the current page is at this level or below it. Use level 1 to always display this menu.'),
       '#required' => TRUE,
@@ -168,7 +169,7 @@ class TreeWidget extends WidgetBase implements ContainerFactoryPluginInterface {
     $element['menu_levels']['depth'] = [
       '#type' => 'select',
       '#title' => $this->t('Number of levels to display'),
-      '#default_value' => $this->getSetting('depth'),
+      '#default_value' => $items[$delta]->depth ?? $this->getSetting('depth'),
       '#options' => $options,
       '#description' => $this->t('This maximum number includes the initial level.'),
       '#required' => TRUE,
@@ -177,7 +178,7 @@ class TreeWidget extends WidgetBase implements ContainerFactoryPluginInterface {
     $element['menu_levels']['expand_all_items'] = [
       '#type' => 'checkbox',
       '#title' => $this->t('Expand all menu links'),
-      '#default_value' => $this->getSetting('expand_all_items'),
+      '#default_value' => $items[$delta]->expand_all_items ?? $this->getSetting('expand_all_items'),
       '#description' => $this->t('Override the option found on each menu link used for expanding children and instead display the whole menu tree as expanded.'),
     ];
 
@@ -191,22 +192,26 @@ class TreeWidget extends WidgetBase implements ContainerFactoryPluginInterface {
     $element['advanced']['follow'] = [
       '#type' => 'checkbox',
       '#title' => $this->t('<strong>Make the initial visibility level follow the active menu item.</strong>'),
-      '#default_value' => $items->getSetting('follow') ?? FALSE,
+      '#default_value' => $items[$delta]->follow ?? $items->getSetting('follow') ?? FALSE,
       '#description' => $this->t('If the active menu item is deeper than the initial visibility level set above, the initial visibility level will be relative to the active menu item. Otherwise, the initial visibility level of the tree will remain fixed.'),
+      '#attributes' => [
+        //define static name so we can easier select it
+        'name' => 'field_menu_follow-' . $delta,
+      ],
     ];
 
     $element['advanced']['follow_parent'] = [
       '#type' => 'radios',
       '#title' => $this->t('Initial visibility level will be'),
       '#description' => $this->t('When following the active menu item, select whether the initial visibility level should be set to the active menu item, or its children.'),
-      '#default_value' => $items->getSetting('follow_parent') ?? FALSE,
+      '#default_value' => $items[$delta]->follow_parent ??  $items->getSetting('follow_parent') ?? FALSE,
       '#options' => [
         'active' => $this->t('Active menu item'),
         'child' => $this->t('Children of active menu item'),
       ],
       '#states' => [
         'visible' => [
-          ':input[name="settings[follow]"]' => ['checked' => TRUE],
+          ':input[name="field_menu_follow-' . $delta . '"]' => ['checked' => TRUE],
         ],
       ],
     ];

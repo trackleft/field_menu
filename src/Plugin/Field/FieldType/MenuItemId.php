@@ -12,9 +12,9 @@ use Drupal\Core\Form\FormStateInterface;
  *
  * @FieldType(
  *   id = "field_menu",
- *   label = @Translation("Menu item"),
+ *   label = @Translation("Menu field"),
  *   module = "field_menu",
- *   description = @Translation("Select a valid Menu item"),
+ *   description = @Translation("Select and configure a menu to display."),
  *   default_widget = "field_menu_tree_widget",
  *   default_formatter = "field_menu_tree_formatter"
  * )

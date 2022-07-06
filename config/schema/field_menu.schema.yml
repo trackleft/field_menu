@@ -1,41 +1,55 @@
 field_menu.settings:
   type: mapping
-  label: 'Field Menu settings'
+  label: 'Field menu settings'
   mapping:
     menu_type_checkbox:
       type: sequence
       label: 'Available menus'
       sequence:
-       type: string
+        type: string
     menu_type_checkbox_negate:
       type: string
       label: 'Negate the condition'
-field_menu.formatter.settings.field_menu:
+
+field.storage_settings.field_menu:
   type: mapping
-  label: 'Menu Field'
+  label: 'Menu field settings'
+
+field.field_settings.field_menu:
+  type: mapping
+  label: 'Field menu settings'
   mapping:
-    settings:
-      type: mapping
-      label: 'Default Menu Settings'
-      mapping:
-        menu_title:
-          type: string
-          label: 'Menu title'
-        menu:
-          type: string
-          label: 'Menu name'
-        level:
-          type: integer
-          label: 'Starting level'
-        depth:
-          type: integer
-          label: 'Depth'
-        expand_all_items:
-          type: boolean
-          label: 'Expand all items'
-        follow:
-          type: boolean
-          label: 'Follow'
-        follow_parent:
-          type: string
-          label: 'Follow option'
+    menu_type_checkbox:
+      type: sequence
+      label: 'Available menus'
+      sequence:
+        type: string
+    menu_type_checkbox_negate:
+      type: string
+      label: 'Negate the condition'
+
+field.value.field_menu:
+  type: mapping
+  label: 'Default value'
+  mapping:
+    menu_title:
+      type: string
+      label: 'Menu title'
+    menu:
+      type: string
+      label: 'Selected menu'
+    level:
+      type: integer
+      label: 'Starting level'
+    depth:
+      type: integer
+      label: 'Depth'
+    expand_all_items:
+      type: boolean
+      label: 'Expand all items'
+    follow:
+      type: boolean
+      label: 'Follow'
+    follow_parent:
+      type: string
+      label: 'Follow option'

@@ -112,6 +112,7 @@ class MenuTreeFormatter extends FormatterBase implements ContainerFactoryPluginI
       else {
         $menu_parameters = $this->menuLinkTree->getCurrentRouteMenuTreeParameters($menu_name);
       }
+      dpm($menu_parameters);
 
       $menu_parameters->setMinDepth($level);
       // If we're following the active trail and the active trail is deeper
