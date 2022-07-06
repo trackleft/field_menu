@@ -7,6 +7,7 @@ use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Field\WidgetBase;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Menu\MenuLinkTreeInterface;
 use Drupal\Core\Menu\MenuParentFormSelectorInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -26,6 +27,13 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 class TreeWidget extends WidgetBase implements ContainerFactoryPluginInterface {
 
   use StringTranslationTrait;
+
+  /**
+   * The menu link tree service.
+   *
+   * @var \Drupal\Core\Menu\MenuLinkTreeInterface
+   */
+  protected $menuTree;
 
   /**
    * The parent form selector service.
@@ -49,10 +57,21 @@ class TreeWidget extends WidgetBase implements ContainerFactoryPluginInterface {
    *   Any third party settings.
    * @param \Drupal\Core\Menu\MenuParentFormSelectorInterface $menu_parent_selector
    *   The menu link tree.
+   * @param \Drupal\Core\Menu\MenuLinkTreeInterface $menu_tree
+   *   The menu tree service.
    */
-  public function __construct($plugin_id, $plugin_definition, FieldDefinitionInterface $field_definition, array $settings, array $third_party_settings, MenuParentFormSelectorInterface $menu_parent_selector) {
+  public function __construct(
+        $plugin_id,
+        $plugin_definition,
+        FieldDefinitionInterface $field_definition,
+        array $settings,
+        array $third_party_settings,
+        MenuParentFormSelectorInterface $menu_parent_selector,
+        MenuLinkTreeInterface $menu_tree
+    ) {
     parent::__construct($plugin_id, $plugin_definition, $field_definition, $settings, $third_party_settings);
     $this->menuParentSelector = $menu_parent_selector;
+    $this->menuTree = $menu_tree;
   }
 
   /**
@@ -60,13 +79,14 @@ class TreeWidget extends WidgetBase implements ContainerFactoryPluginInterface {
    */
   public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
     return new static(
-      $plugin_id,
-      $plugin_definition,
-      $configuration['field_definition'],
-      $configuration['settings'],
-      $configuration['third_party_settings'],
-      $container->get('menu.parent_form_selector')
-    );
+          $plugin_id,
+          $plugin_definition,
+          $configuration['field_definition'],
+          $configuration['settings'],
+          $configuration['third_party_settings'],
+          $container->get('menu.parent_form_selector'),
+          $container->get('menu.link_tree')
+      );
   }
 
   /**
@@ -74,17 +94,26 @@ class TreeWidget extends WidgetBase implements ContainerFactoryPluginInterface {
    */
   public static function defaultSettings() {
     return [
-      'max_depth' => 0,
-      'menu_item_key' => '',
-      'include_root' => FALSE,
       'menu_title' => '',
+      'menu' => '',
+      'level' => 2,
+      'depth' => 0,
+      'expand_all_items' => FALSE,
+      'follow' => 0,
+      'follow_parent' => 'child',
     ] + parent::defaultSettings();
   }
 
   /**
    * {@inheritdoc}
    */
-  public function formElement(FieldItemListInterface $items, $delta, array $element, array &$form, FormStateInterface $form_state) {
+  public function formElement(
+        FieldItemListInterface $items,
+        $delta,
+        array $element,
+        array &$form,
+        FormStateInterface $form_state
+    ) {
     $element['menu_title'] = [
       '#type' => 'textfield',
       '#title' => $this->t('Title'),
@@ -92,22 +121,124 @@ class TreeWidget extends WidgetBase implements ContainerFactoryPluginInterface {
       '#description' => $this->t('Optional title for the menu.'),
     ];
 
-    $menu_key_value = $items[$delta]->menu_item_key ?? $this->getSetting('menu_item_key');
-
-    // Get existing data from field if there is any.
-    $menu_key_value_arr = explode(':', $menu_key_value);
-    $menu_name = $menu_key_value_arr[0] ?? NULL;
-    $parent = $menu_key_value_arr[1] ?? NULL;
-    $menu_link = $menu_key_value_arr[2] ?? NULL;
-    $menu_parent = $menu_name . ':' . $parent;
-
     /* Build a select field with all the menus the current user
      * has access to with a unique key
      * (uses the same fuctionality as when a user adds a menu link to a node)
      */
 
     // Limit menu list from field settings.
-    $menus = NULL;
+    $menus = $this->getSelectableMenus($items);
+    $menu_options = menu_ui_get_menus();
+
+    $element['menu'] = [
+      '#type' => 'select',
+      '#title' => $this->t('Menu'),
+      // '#default_value' => $items[$delta]->menu ?? $this->getSetting('menu'),
+      '#options' => $menu_options,
+      '#description' => $this->t('Select a menu'),
+    ];
+
+    $element['menu_levels'] = [
+      '#type' => 'details',
+      '#title' => $this->t('Menu levels'),
+      // Open if not set to defaults.
+      '#open' => $this->getSetting('level') !== $items[$delta]->level || $this->getSetting('depth') !== $items[$delta]->depth,
+      '#process' => [[get_class(), 'processMenuLevelParents']],
+      '#states' => [
+        'visible' => [
+          ':input[name="settings[menu]"]' => ['filled' => TRUE],
+        ],
+      ],
+    ];
+
+    $options = range(0, $this->menuTree->maxDepth());
+    unset($options[0]);
+
+    $element['menu_levels']['level'] = [
+      '#type' => 'select',
+      '#title' => $this->t('Initial visibility level'),
+      '#default_value' => $this->getSetting('level'),
+      '#options' => $options,
+      '#description' => $this->t('The menu is only visible if the menu link for the current page is at this level or below it. Use level 1 to always display this menu.'),
+      '#required' => TRUE,
+    ];
+
+    $options[0] = $this->t('Unlimited');
+
+    $element['menu_levels']['depth'] = [
+      '#type' => 'select',
+      '#title' => $this->t('Number of levels to display'),
+      '#default_value' => $this->getSetting('depth'),
+      '#options' => $options,
+      '#description' => $this->t('This maximum number includes the initial level.'),
+      '#required' => TRUE,
+    ];
+
+    $element['menu_levels']['expand_all_items'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Expand all menu links'),
+      '#default_value' => $this->getSetting('expand_all_items'),
+      '#description' => $this->t('Override the option found on each menu link used for expanding children and instead display the whole menu tree as expanded.'),
+    ];
+
+    $element['advanced'] = [
+      '#type' => 'details',
+      '#title' => $this->t('Advanced options'),
+      '#open' => FALSE,
+      '#process' => [[get_class(), 'processMenuFieldSets']],
+    ];
+
+    $element['advanced']['follow'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('<strong>Make the initial visibility level follow the active menu item.</strong>'),
+      '#default_value' => $items->getSetting('follow') ?? FALSE,
+      '#description' => $this->t('If the active menu item is deeper than the initial visibility level set above, the initial visibility level will be relative to the active menu item. Otherwise, the initial visibility level of the tree will remain fixed.'),
+    ];
+
+    $element['advanced']['follow_parent'] = [
+      '#type' => 'radios',
+      '#title' => $this->t('Initial visibility level will be'),
+      '#description' => $this->t('When following the active menu item, select whether the initial visibility level should be set to the active menu item, or its children.'),
+      '#default_value' => $items->getSetting('follow_parent') ?? FALSE,
+      '#options' => [
+        'active' => $this->t('Active menu item'),
+        'child' => $this->t('Children of active menu item'),
+      ],
+      '#states' => [
+        'visible' => [
+          ':input[name="settings[follow]"]' => ['checked' => TRUE],
+        ],
+      ],
+    ];
+    $element += [
+      '#element_validate' => [
+      [$this, 'validate'],
+      ],
+    ];
+
+    // If cardinality is 1, ensure a label is output for the field by wrapping
+    // it in a details element.
+    if ($this->fieldDefinition->getFieldStorageDefinition()->getCardinality() === 1) {
+      $element += [
+        '#type' => 'fieldset',
+        '#attributes' => ['class' => ['container']],
+      ];
+    }
+
+    return $element;
+  }
+
+  /**
+   * Get selectable menus.
+   *
+   * Adjusts the selectable menus based on admin settings.
+   *
+   * @return array
+   *   An array of menu names.
+   */
+  public static function getSelectableMenus(FieldItemListInterface $items) {
+    $menus = [];
+
     if (!empty($items->getSetting('menu_type_checkbox'))) {
       $negate = $items->getSetting('menu_type_checkbox_negate') ?? FALSE;
       if ($negate) {
@@ -121,46 +252,26 @@ class TreeWidget extends WidgetBase implements ContainerFactoryPluginInterface {
       $menus = empty($menu_selected) ? NULL : $menu_selected;
     }
 
-    $menu_item_key_field = $this->menuParentSelector->parentSelectElement($menu_parent, $menu_link, $menus);
-    $menu_item_key_field['#default_value'] = $menu_key_value;
-    $menu_item_key_field['#description'] = $this->t('Select a menu root item from the available menu links');
-    $menu_item_key_field += [
-      '#empty_value' => '',
-      '#title' => $this->t('Root'),
-    ];
+    return $menus;
+  }
 
-    $element['menu_item_key'] = $menu_item_key_field;
+  /**
+   * Form API callback: Processes the elements in field sets.
+   *
+   * Adjusts the #parents of field sets to save its children at the top level.
+   */
+  public static function processMenuFieldSets(&$element, FormStateInterface $form_state, &$complete_form) {
+    array_pop($element['#parents']);
+    return $element;
+  }
 
-    $element['max_depth'] = [
-      '#type' => 'number',
-      '#title' => $this->t('Max depth'),
-      '#default_value' => $items[$delta]->max_depth ?? $this->getSetting('max_depth'),
-      '#description' => $this->t('Maximum depth of the menu tree (0 is no limit).'),
-      '#min' => 0,
-    ];
-
-    $element['include_root'] = [
-      '#type' => 'checkbox',
-      '#title' => $this->t('Include root?'),
-      '#description' => $this->t('Include the root item in the tree or just the child elements'),
-      '#default_value' => $items[$delta]->include_root ?? $this->getSetting('include_root'),
-    ];
-
-    $element += [
-      '#element_validate' => [
-        [$this, 'validate'],
-      ],
-    ];
-
-    // If cardinality is 1, ensure a label is output for the field by wrapping
-    // it in a details element.
-    if ($this->fieldDefinition->getFieldStorageDefinition()->getCardinality() == 1) {
-      $element += [
-        '#type' => 'fieldset',
-        '#attributes' => ['class' => ['container']],
-      ];
-    }
-
+  /**
+   * Form API callback: Processes the menu_levels field element.
+   *
+   * Adjusts the #parents of menu_levels to save its children at the top level.
+   */
+  public static function processMenuLevelParents(&$element, FormStateInterface $form_state, &$complete_form) {
+    array_pop($element['#parents']);
     return $element;
   }
 
@@ -168,11 +279,11 @@ class TreeWidget extends WidgetBase implements ContainerFactoryPluginInterface {
    * Validate the Menu item Key field.
    */
   public function validate($element, FormStateInterface $form_state) {
-    $menu_item_key = $element['menu_item_key']['#value'] ?? '';
-    if (strlen($menu_item_key) == 0) {
-      $form_state->setValueForElement($element['menu_item_key'], '');
+    $menu = $element['menu']['#value'] ?? '';
+    if (strlen($menu) === 0) {
+      $form_state->setValueForElement($element['menu'], '');
       if ($element['menu_title']['#value']) {
-        $form_state->setError($element['menu_item_key'], $this->t("You must select a menu item if you have set a title"));
+        $form_state->setError($element['menu'], $this->t("You must select a menu item if you have set a title"));
       }
     }
   }

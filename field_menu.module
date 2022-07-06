@@ -5,8 +5,8 @@
  * A menu tree field using the Field Types API.
  */
 
-use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\Entity\EntityBase;
+use Drupal\Core\Routing\RouteMatchInterface;
 
 /**
  * Implements hook_help().
@@ -72,8 +72,8 @@ function field_menu_theme_registry_alter(&$theme_registry) {
  */
 function field_menu_theme_suggestions_menu(array $variables) {
   $suggestions = [];
-  // The MenuTreeFormatter plugin's viewElements() method populates
-  // this variable.
+  // The MenuTreeFormatter plugin's viewElements() method populates this
+  // variable.
   if (!empty($variables['field_menu_configuration'])) {
     $menu_name = strtr($variables['menu_name'], '-', '_');
     $suggestions[] = 'menu__' . $menu_name;

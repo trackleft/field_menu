@@ -10,3 +10,32 @@ field_menu.settings:
     menu_type_checkbox_negate:
       type: string
       label: 'Negate the condition'
+field_menu.formatter.settings.field_menu:
+  type: mapping
+  label: 'Menu Field'
+  mapping:
+    settings:
+      type: mapping
+      label: 'Default Menu Settings'
+      mapping:
+        menu_title:
+          type: string
+          label: 'Menu title'
+        menu:
+          type: string
+          label: 'Menu name'
+        level:
+          type: integer
+          label: 'Starting level'
+        depth:
+          type: integer
+          label: 'Depth'
+        expand_all_items:
+          type: boolean
+          label: 'Expand all items'
+        follow:
+          type: boolean
+          label: 'Follow'
+        follow_parent:
+          type: string
+          label: 'Follow option'
