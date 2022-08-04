@@ -93,7 +93,6 @@ class MenuTreeFormatter extends FormatterBase implements ContainerFactoryPluginI
     // Set the values here so we can pass them to the menu.
     $this->configuration['providing_entity'] = $items->getEntity();
     $this->configuration['view_mode'] = $this->viewMode;
-
     foreach ($items as $delta => $item) {
       // Adjust the menu tree parameters based on the block's configuration.
       $menu_name = $item->menu;
