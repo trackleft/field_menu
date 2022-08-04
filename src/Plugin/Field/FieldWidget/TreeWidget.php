@@ -4,12 +4,10 @@ namespace Drupal\field_menu\Plugin\Field\FieldWidget;
 
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Core\Field\FieldItemListInterface;
-use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Field\WidgetBase;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\Menu\MenuLinkTreeInterface;
-use Drupal\Core\Menu\MenuParentFormSelectorInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
+use Drupal\system\Entity\Menu;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -43,50 +41,24 @@ class TreeWidget extends WidgetBase implements ContainerFactoryPluginInterface {
   protected $menuParentSelector;
 
   /**
-   * Constructs a TreeWidget object.
-   *
-   * @param string $plugin_id
-   *   The plugin_id for the widget.
-   * @param mixed $plugin_definition
-   *   The plugin implementation definition.
-   * @param \Drupal\Core\Field\FieldDefinitionInterface $field_definition
-   *   The definition of the field to which the widget is associated.
-   * @param array $settings
-   *   The widget settings.
-   * @param array $third_party_settings
-   *   Any third party settings.
-   * @param \Drupal\Core\Menu\MenuParentFormSelectorInterface $menu_parent_selector
-   *   The menu link tree.
-   * @param \Drupal\Core\Menu\MenuLinkTreeInterface $menu_tree
-   *   The menu tree service.
-   */
-  public function __construct(
-        $plugin_id,
-        $plugin_definition,
-        FieldDefinitionInterface $field_definition,
-        array $settings,
-        array $third_party_settings,
-        MenuParentFormSelectorInterface $menu_parent_selector,
-        MenuLinkTreeInterface $menu_tree
-    ) {
-    parent::__construct($plugin_id, $plugin_definition, $field_definition, $settings, $third_party_settings);
-    $this->menuParentSelector = $menu_parent_selector;
-    $this->menuTree = $menu_tree;
-  }
-
-  /**
    * {@inheritdoc}
    */
-  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
-    return new static(
-          $plugin_id,
-          $plugin_definition,
-          $configuration['field_definition'],
-          $configuration['settings'],
-          $configuration['third_party_settings'],
-          $container->get('menu.parent_form_selector'),
-          $container->get('menu.link_tree')
-      );
+  public static function create(
+    ContainerInterface $container,
+    array $configuration,
+    $plugin_id,
+    $plugin_definition
+    ) {
+    $instance = parent::create(
+      $container,
+      $configuration,
+      $plugin_id,
+      $plugin_definition
+    );
+    $instance->menuParentSelector = $container->get('menu.parent_form_selector');
+    $instance->menuTree = $container->get('menu.link_tree');
+
+    return $instance;
   }
 
   /**
@@ -128,8 +100,7 @@ class TreeWidget extends WidgetBase implements ContainerFactoryPluginInterface {
      */
 
     // Limit menu list from field settings.
-    $menus = $this->getSelectableMenus($items);
-    $menu_options = menu_ui_get_menus();
+    $menu_options = $this->getSelectableMenus($items);
 
     $element['menu'] = [
       '#type' => 'select',
@@ -234,27 +205,31 @@ class TreeWidget extends WidgetBase implements ContainerFactoryPluginInterface {
   }
 
   /**
-   * Get selectable menus.
+   * Returns the sorted selectable menus for a menu field.
    *
    * Adjusts the selectable menus based on admin settings.
    *
    * @return array
-   *   An array of menu names.
+   *   An array of human-readable menu names, keyed by their menu machine names.
    */
   public static function getSelectableMenus(FieldItemListInterface $items) {
     $menus = [];
+      $menu_options = array_map(function ($menu) {
+        return $menu->label();
+      }, Menu::loadMultiple());
+      asort($menu_options);
 
     if (!empty($items->getSetting('menu_type_checkbox'))) {
       $negate = $items->getSetting('menu_type_checkbox_negate') ?? FALSE;
       if ($negate) {
-        $menu_options = menu_ui_get_menus();
         $menu_selected = array_diff($items->getSetting('menu_type_checkbox'), array_keys($menu_options));
-        $menu_selected = array_combine(array_keys($menu_selected), array_keys($menu_selected));
+        $menu_selected = array_intersect_key($menu_options, $menu_selected);
       }
       else {
         $menu_selected = array_diff($items->getSetting('menu_type_checkbox'), [0]);
+        $menu_selected = array_intersect_key($menu_options, $menu_selected);
       }
-      $menus = empty($menu_selected) ? NULL : $menu_selected;
+      $menus = empty($menu_selected) ? $menu_options : $menu_selected;
     }
 
     return $menus;
