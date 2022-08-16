@@ -10,10 +10,12 @@ use Drupal\Core\Database\Database;
  *
  * This affects all existing field_menu implementations on this site.
  */
-function field_menu_update_9203(&$sandbox) {
+function field_menu_update_9209(&$sandbox) {
   $schema = Database::getConnection()->schema();
   $all_field_menu_fields = \Drupal::service('entity_field.manager')->getFieldMapByFieldType('field_menu');
-  foreach ($all_field_menu_fields as $entity_type => $field_type) {
+  dd($all_field_menu_fields);
+  foreach ($all_field_menu_fields as $entity_type => $field) {
+    $field_name = array_key_first($field);
     // dd($entity_type);
 
     // New column for menu title.
@@ -23,7 +25,7 @@ function field_menu_update_9203(&$sandbox) {
       'not null' => FALSE,
       'size' => 'tiny',
     ];
-    $schema->addField($entity_type . '__field_menu', 'field_menu_title', $spec_title);
+    $schema->addField($entity_type . '__' . $field_name, $field_name . '_title', $spec_title);
     // New column for selected menu.
     $spec_menu = [
       'type' => 'text',
@@ -31,7 +33,7 @@ function field_menu_update_9203(&$sandbox) {
       'not null' => FALSE,
       'size' => 'tiny',
     ];
-    $schema->addField($entity_type . '__field_menu', 'field_menu_menu', $spec_menu);
+    $schema->addField($entity_type . '__' . $field_name, $field_name . '_menu', $spec_menu);
     // New column for starting level.
     $spec_level = [
       'type' => 'int',
@@ -39,7 +41,7 @@ function field_menu_update_9203(&$sandbox) {
       'not null' => FALSE,
       'size' => 'small',
     ];
-    $schema->addField($entity_type . '__field_menu', 'field_menu_level', $spec_level);
+    $schema->addField($entity_type . '__' . $field_name, $field_name . '_level', $spec_level);
     // New column for depth.
     $spec_depth = [
       'type' => 'int',
@@ -47,7 +49,7 @@ function field_menu_update_9203(&$sandbox) {
       'not null' => FALSE,
       'size' => 'small',
     ];
-    $schema->addField($entity_type . '__field_menu', 'field_menu_depth', $spec_depth);
+    $schema->addField($entity_type . '__' . $field_name, $field_name . '_depth', $spec_depth);
     // New column for expand all items.
     $spec_expand_all_items = [
       'type' => 'int',
@@ -55,7 +57,7 @@ function field_menu_update_9203(&$sandbox) {
       'not null' => FALSE,
       'size' => 'tiny',
     ];
-    $schema->addField($entity_type . '__field_menu', 'field_menu_expand_all_items', $spec_expand_all_items);
+    $schema->addField($entity_type . '__' . $field_name, $field_name . '_expand_all_items', $spec_expand_all_items);
     // New column for follow.
     $spec_follow = [
       'type' => 'int',
@@ -63,7 +65,7 @@ function field_menu_update_9203(&$sandbox) {
       'not null' => FALSE,
       'size' => 'tiny',
     ];
-    $schema->addField($entity_type . '__field_menu', 'field_menu_follow', $spec_follow);
+    $schema->addField($entity_type . '__' . $field_name, $field_name . '_follow', $spec_follow);
     // New column for follow option.
     $spec_follow_parent = [
       'type' => 'text',
@@ -71,7 +73,7 @@ function field_menu_update_9203(&$sandbox) {
       'not null' => FALSE,
       'size' => 'tiny',
     ];
-    $schema->addField($entity_type . '__field_menu', 'field_menu_follow_parent', $spec_follow_parent);
+    $schema->addField($entity_type . '__' . $field_name, $field_name . '_follow_parent', $spec_follow_parent);
     // New revision column for menu title.
     $spec_title = [
       'type' => 'text',
@@ -79,7 +81,7 @@ function field_menu_update_9203(&$sandbox) {
       'not null' => FALSE,
       'size' => 'tiny',
     ];
-    $schema->addField($entity_type . '_revision__field_menu', 'field_menu_title', $spec_title);
+    $schema->addField($entity_type . '_revision__' . $field_name, $field_name . '_title', $spec_title);
     // New revision column for selected menu.
     $spec_menu = [
       'type' => 'text',
@@ -87,7 +89,7 @@ function field_menu_update_9203(&$sandbox) {
       'not null' => FALSE,
       'size' => 'tiny',
     ];
-    $schema->addField($entity_type . '_revision__field_menu', 'field_menu_menu', $spec_menu);
+    $schema->addField($entity_type . '_revision__' . $field_name, $field_name . '_menu', $spec_menu);
     // New revision column for starting level.
     $spec_level = [
       'type' => 'int',
@@ -95,7 +97,7 @@ function field_menu_update_9203(&$sandbox) {
       'not null' => FALSE,
       'size' => 'small',
     ];
-    $schema->addField($entity_type . '_revision__field_menu', 'field_menu_level', $spec_level);
+    $schema->addField($entity_type . '_revision__' . $field_name, $field_name . '_level', $spec_level);
     // New revision column for depth.
     $spec_depth = [
       'type' => 'int',
@@ -103,7 +105,7 @@ function field_menu_update_9203(&$sandbox) {
       'not null' => FALSE,
       'size' => 'small',
     ];
-    $schema->addField($entity_type . '_revision__field_menu', 'field_menu_depth', $spec_depth);
+    $schema->addField($entity_type . '_revision__' . $field_name, $field_name . '_depth', $spec_depth);
     // New revision column for expand all items.
     $spec_expand_all_items = [
       'type' => 'int',
@@ -111,7 +113,7 @@ function field_menu_update_9203(&$sandbox) {
       'not null' => FALSE,
       'size' => 'tiny',
     ];
-    $schema->addField($entity_type . '_revision__field_menu', 'field_menu_expand_all_items', $spec_expand_all_items);
+    $schema->addField($entity_type . '_revision__' . $field_name, $field_name . '_expand_all_items', $spec_expand_all_items);
     // New revision column for follow.
     $spec_follow = [
       'type' => 'int',
@@ -119,7 +121,7 @@ function field_menu_update_9203(&$sandbox) {
       'not null' => FALSE,
       'size' => 'tiny',
     ];
-    $schema->addField($entity_type . '_revision__field_menu', 'field_menu_follow', $spec_follow);
+    $schema->addField($entity_type . '_revision__' . $field_name, $field_name . '_follow', $spec_follow);
     // New revision column for follow option.
     $spec_follow_parent = [
       'type' => 'text',
@@ -127,7 +129,7 @@ function field_menu_update_9203(&$sandbox) {
       'not null' => FALSE,
       'size' => 'tiny',
     ];
-    $schema->addField($entity_type . '_revision__field_menu', 'field_menu_follow_parent', $spec_follow_parent);
+    $schema->addField($entity_type . '_revision__' . $field_name, $field_name . '_follow_parent', $spec_follow_parent);
   }
 
   $existing_menu_setting = 'main:views_view:views.recipes.page_1';
