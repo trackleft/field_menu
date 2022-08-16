@@ -13,15 +13,20 @@ INTRODUCTION
 The Field Menu module provides a field type that allows the selection
 of a menu tree to display in page.
 
-This is useful if for example you want a really customised sitemap.
+This is useful if, for example, you want a really customised sitemap.
 Simply apply it to a Content Type or Paragraph entity so you can output
 your own, dynamic, sitemap page with minimal configuration.
 
 Other possiblitities include:
-A replacement for the Drupal 7 menu_bean module using content blocks.
+Upgrade from the Drupal 7 menu_bean module using Drupal 8/9/10 core content blocks.
 Adding menus to content blocks, which can be embedded easily using entity_embed.
 Adding blocks without the use of the block field module.
 Replacement for menu_block.
+Create a menu Paragraph
+Add a menu to media items.
+Add a menu to taxonomy terms.
+Add a menu to a content type.
+Add a menu to a fieldable entity.
 
 REQUIREMENTS
 ------------
@@ -46,17 +51,43 @@ Navigate to your chosen entity type, and add a field:
  USE
 -------------
 
-A Menu item field appering in an entity edit form has the following options:
- * Title: an optional title for the selected menu tree
- * Menu: the existing menu the user wishes to display.
- * Initial visibility level: The menu is only visible if the menu link for the
- current page is at this level or below it. Use level 1 to always display this menu.
- * Number of levels to display: This maximum number includes the initial level.
- * Make the initial visibility level follow the active menu item: If the active
- menu item is deeper than the initial visibility level set above, the initial
- visibility level will be relative to the active menu item. Otherwise, the
- initial visibility level of the tree will remain fixed.
- * Initial visibility level will be (Active menu item) or (Children of active menu
- item): When following the active menu item, select whether the initial
- visibility level should be set to the active menu item, or its children.
+CONFIGURING MENU FIELD
+-----------------------
 
+When adding or configuring a menu field, several configuration options are
+available:
+
+Basic Options:
+
+  Title
+    An optional title for the selected menu.
+
+  Display title
+    Checkbox to have the block title visible or not. If unchecked, the block
+    title will remain accessible, but hidden visually.
+
+Menu levels:
+
+  Initial menu level
+    The menu will only be visible if the menu item for the current page is at or
+    below the selected starting level. Select level 1 to always keep this menu
+    visible.
+
+  Maximum number of menu levels to display
+    The maximum number of menu levels to show, starting from the initial menu
+    level. For example: with an initial level 2 and a maximum number of 3, menu
+    levels 2, 3 and 4 can be displayed.
+
+Advanced options:
+
+  Expand all menu links
+    All menu links that have children will "Show as expanded".
+
+  Fixed parent item
+    Alter the options in “Menu levels” to be relative to the fixed parent item.
+    The block will only contain children of the selected menu link.
+
+See the field configuration page within your site to see all options.
+
+ THEME
+-------------

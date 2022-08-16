@@ -222,7 +222,7 @@ class MenuTreeFormatter extends FormatterBase implements ContainerFactoryPluginI
 
       $tree = $this->menuLinkTree->transform($tree, $manipulators);
       $tree_render_array = $this->menuLinkTree->build($tree);
-      $menu_title = trim($item->menu_title);
+      $menu_title = trim($item->title);
       if (!empty($tree_render_array['#theme'])) {
         // Add the configuration for use in menu_block_theme_suggestions_menu().
         $tree_render_array['#field_menu_configuration'] = $this->configuration;

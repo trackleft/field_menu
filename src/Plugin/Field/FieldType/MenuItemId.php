@@ -27,7 +27,7 @@ class MenuItemId extends FieldItemBase {
   public static function schema(FieldStorageDefinitionInterface $field_definition) {
     return [
       'columns' => [
-        'menu_title' => [
+        'title' => [
           'type' => 'text',
           'size' => 'tiny',
           'not null' => FALSE,
