@@ -6,14 +6,13 @@
 use Drupal\Core\Database\Database;
 
 /**
- * Convert existing field_menu implementation to use new field properties.
+ * Update all menu field instances with new properties.
  *
  * This affects all existing field_menu implementations on this site.
  */
-function field_menu_update_9209(&$sandbox) {
+function field_menu_update_9201() {
   $schema = Database::getConnection()->schema();
   $all_field_menu_fields = \Drupal::service('entity_field.manager')->getFieldMapByFieldType('field_menu');
-  dd($all_field_menu_fields);
   foreach ($all_field_menu_fields as $entity_type => $field) {
     $field_name = array_key_first($field);
     // dd($entity_type);
@@ -131,7 +130,15 @@ function field_menu_update_9209(&$sandbox) {
     ];
     $schema->addField($entity_type . '_revision__' . $field_name, $field_name . '_follow_parent', $spec_follow_parent);
   }
+}
 
+/**
+ * Convert existing field_menu implementation to use new field properties.
+ *
+ * This affects all existing field_menu implementations on this site.
+ */
+function field_menu_update_9202(&$sandbox) {
+  // Need to figure out how to show a specific menu item and its children.
   $existing_menu_setting = 'main:views_view:views.recipes.page_1';
   $existing_include_root = TRUE;
   $existing_menu_array = explode(':', $existing_menu_setting);
@@ -145,13 +152,26 @@ function field_menu_update_9209(&$sandbox) {
   if ($existing_include_root) {
     $new_level = $new_level - 1;
   };
+}
 
-  // After transforming all of the data, we can drop the old columns.
-  // $schema->dropField('block_content__field_menu', 'field_menu_menu_item_key');
-  // $schema->dropField('block_content__field_menu', 'field_menu_max_depth');
-  // $schema->dropField('block_content__field_menu', 'field_menu_include_root');
-  // $schema->dropField('block_content__field_menu', 'field_menu_menu_title');
-
-
-// Need to figure out how to show a specific menu item and its children.
+/**
+ * Delete old unused field_menu properties.
+ *
+ * This affects all existing field_menu implementations on this site.
+ */
+function field_menu_update_9203(&$sandbox) {
+  $schema = Database::getConnection()->schema();
+  $all_field_menu_fields = \Drupal::service('entity_field.manager')->getFieldMapByFieldType('field_menu');
+  foreach ($all_field_menu_fields as $entity_type => $field) {
+    $field_name = array_key_first($field);
+    // After transforming all of the data, we can drop the old columns.
+    $schema->dropField($entity_type . '__' . $field_name, $field_name . '_menu_item_key');
+    $schema->dropField($entity_type . '__' . $field_name, $field_name . '_max_depth');
+    $schema->dropField($entity_type . '__' . $field_name, $field_name . '_include_root');
+    $schema->dropField($entity_type . '__' . $field_name, $field_name . '_menu_title');
+    $schema->dropField($entity_type . '_revision__' . $field_name, $field_name . '_menu_item_key');
+    $schema->dropField($entity_type . '_revision__' . $field_name, $field_name . '_max_depth');
+    $schema->dropField($entity_type . '_revision__' . $field_name, $field_name . '_include_root');
+    $schema->dropField($entity_type . '_revision__' . $field_name, $field_name . '_menu_title');
+  }
 }
