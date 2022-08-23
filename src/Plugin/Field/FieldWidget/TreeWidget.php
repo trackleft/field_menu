@@ -68,11 +68,13 @@ class TreeWidget extends WidgetBase implements ContainerFactoryPluginInterface {
     return [
       'title' => '',
       'menu' => '',
+      'parent' => '',
       'level' => 2,
       'depth' => 0,
       'expand_all_items' => FALSE,
       'follow' => FALSE,
       'follow_parent' => 'child',
+      'render_parent' => FALSE,
     ] + parent::defaultSettings();
   }
 
@@ -90,7 +92,7 @@ class TreeWidget extends WidgetBase implements ContainerFactoryPluginInterface {
     $element['title'] = [
       '#type' => 'textfield',
       '#title' => $this->t('Title'),
-      '#default_value' => $item->title ?? $this->getSetting('menu_title'),
+      '#default_value' => $item->title ?? $this->getSetting('title'),
       '#description' => $this->t('Optional title for the menu.'),
     ];
 
@@ -160,6 +162,69 @@ class TreeWidget extends WidgetBase implements ContainerFactoryPluginInterface {
       '#process' => [[get_class(), 'processMenuFieldSets']],
     ];
 
+    $element['advanced']['parent'] = [
+      '#type' => 'select',
+      '#title' => $this->t('Fixed parent item'),
+      '#description' => $this->t('Alter the options in “Menu levels” to be relative to the fixed parent item. The block will only contain children of the selected menu link.'),
+    ];
+
+    $parent_value = $item->parent ?? $this->getSetting('parent');
+    // Get existing data from field if there is any.
+    $parent_arr = explode(':', $parent_value);
+    $parent_menu_name = $parent_arr[0] ?? NULL;
+    $parent = $parent_arr[1] ?? NULL;
+    $parent_menu_link = $parent_arr[2] ?? NULL;
+    $menu_parent = $parent_menu_name . ':' . $parent;
+
+    /* Build a select field with all the menus the current user
+     * has access to with a unique key
+     * (uses the same fuctionality as when a user adds a menu link to a node)
+     */
+
+    // Limit menu list from field settings.
+    $parent_menus = NULL;
+    if (!empty($items->getSetting('menu_type_checkbox'))) {
+      $negate = $items->getSetting('menu_type_checkbox_negate') ?? FALSE;
+      if ($negate) {
+        $parent_menu_options = Menu::loadMultiple();
+        $parent_menu_selected = array_diff($items->getSetting('menu_type_checkbox'), array_keys($parent_menu_options));
+        $parent_menu_selected = array_combine(array_keys($parent_menu_selected), array_keys($parent_menu_selected));
+      }
+      else {
+        $parent_menu_selected = array_diff($items->getSetting('menu_type_checkbox'), [0]);
+      }
+      $parent_menus = empty($parent_menu_selected) ? NULL : $parent_menu_selected;
+    }
+
+    $parent_field = $this->menuParentSelector->parentSelectElement($menu_parent, $parent_menu_link, $parent_menus);
+    $parent_field['#default_value'] = $parent_value;
+    $parent_field += [
+      '#empty_value' => '',
+      '#title' => $this->t('Fixed parent item'),
+      '#description' => $this->t('Alter the options in “Menu levels” to be relative to the fixed parent item. The block will only contain children of the selected menu link.'),
+    ];
+
+    $element['advanced']['parent'] = $parent_field;
+    $element['advanced']['render_parent'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('<strong>Render parent item</strong>'),
+      '#default_value' => $item->render_parent ?? $this->getSetting('render_parent'),
+      '#description' => $this->t('If the <strong>Initial visibility level</strong> is greater than 1, or a <strong>Fixed parent item</strong> is chosen, only the children of that item will be displayed by default. Enable this option to <strong>always</strong> render the parent item in the menu.'),
+      '#states' => [
+        'visible' => [
+          ':input[name="settings[follow]"]' => ['unchecked' => TRUE],
+          [
+            [':input[name="settings[level]"]' => ['!value' => 1]],
+            'or',
+            [':input[name="settings[parent]"]' => ['!value' => $this->getSetting('menu') . ':']],
+          ],
+        ],
+        // Ideally, we would uncheck the setting when it's not visible, but that won't work until
+        // https://www.drupal.org/project/drupal/issues/994360 lands.
+      ],
+    ];
+
+
     $element['advanced']['follow'] = [
       '#type' => 'checkbox',
       '#title' => $this->t('<strong>Make the initial visibility level follow the active menu item.</strong>'),
@@ -214,10 +279,10 @@ class TreeWidget extends WidgetBase implements ContainerFactoryPluginInterface {
    */
   public static function getSelectableMenus(FieldItemListInterface $items) {
     $menus = [];
-      $menu_options = array_map(function ($menu) {
-        return $menu->label();
-      }, Menu::loadMultiple());
-      asort($menu_options);
+    $menu_options = array_map(function ($menu) {
+      return $menu->label();
+    }, Menu::loadMultiple());
+    asort($menu_options);
 
     if (!empty($items->getSetting('menu_type_checkbox'))) {
       $negate = $items->getSetting('menu_type_checkbox_negate') ?? FALSE;

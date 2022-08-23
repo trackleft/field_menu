@@ -5,10 +5,12 @@ field_menu.settings:
     menu_type_checkbox:
       type: sequence
       label: 'Available menus'
+      orderby: key
       sequence:
-        type: string
+        type: system.menu.[%id]
+        label: 'Menu'
     menu_type_checkbox_negate:
-      type: string
+      type: boolean
       label: 'Negate the condition'
 
 field.storage_settings.field_menu:
@@ -22,40 +24,12 @@ field.field_settings.field_menu:
     menu_type_checkbox:
       type: sequence
       label: 'Available menus'
+      orderby: key
       sequence:
-        type: string
+        type: system.menu.[%key]
+        label: 'Menus'
     menu_type_checkbox_negate:
-      type: string
-      label: 'Negate the condition'
-
-field_menu.settings:
-  type: mapping
-  label: 'Field menu settings'
-  mapping:
-    menu_type_checkbox:
-      type: sequence
-      label: 'Available menus'
-      sequence:
-        type: string
-    menu_type_checkbox_negate:
-      type: string
-      label: 'Negate the condition'
-
-field.storage_settings.field_menu:
-  type: mapping
-  label: 'Menu field settings'
-
-field.field_settings.field_menu:
-  type: mapping
-  label: 'Field menu settings'
-  mapping:
-    menu_type_checkbox:
-      type: sequence
-      label: 'Available menus'
-      sequence:
-        type: string
-    menu_type_checkbox_negate:
-      type: string
+      type: boolean
       label: 'Negate the condition'
 
 field.value.field_menu:
@@ -83,3 +57,9 @@ field.value.field_menu:
     follow_parent:
       type: string
       label: 'Follow option'
+    parent:
+      type: string
+      label: 'Parent menu link'
+    render_parent:
+      type: boolean
+      label: 'Render parent menu link'
