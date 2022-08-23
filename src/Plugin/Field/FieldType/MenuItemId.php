@@ -130,7 +130,7 @@ class MenuItemId extends FieldItemBase {
   public function fieldSettingsForm(array $form, FormStateInterface $form_state) {
 
     $element = [];
-    $menu_options = Menu::loadMultiple();
+    $menu_options = menu_ui_get_menus();
     $default_value = $this->getSetting('menu_type_checkbox') ?? [];
     $element['menu_type_checkbox'] = [
       '#type' => 'checkboxes',
