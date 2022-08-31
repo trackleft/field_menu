@@ -170,14 +170,15 @@ class TreeWidget extends WidgetBase implements ContainerFactoryPluginInterface {
       '#title' => $this->t('Fixed parent item'),
       '#description' => $this->t('Alter the options in “Menu levels” to be relative to the fixed parent item. The block will only contain children of the selected menu link.'),
     ];
-
-    $parent_value = $item->parent ?? $default_options['parent'];
-    // Get existing data from field if there is any.
-    $parent_arr = explode(':', $parent_value);
-    $parent_menu_name = $parent_arr[0] ?? NULL;
-    $parent = $parent_arr[1] ?? NULL;
-    $parent_menu_link = $parent_arr[2] ?? NULL;
-    $menu_parent = $parent_menu_name . ':' . $parent;
+    $parent_value = $options->parent ?? $default_options['parent'];
+    if ($parent_value) {
+      $parent_arr = explode(':', $parent_value);
+      $parent_menu_name = $parent_arr[0] ?? NULL;
+      $parent = $parent_arr[1] ?? NULL;
+      // Get existing data from field if there is any.
+      $parent_menu_link = $parent_arr[2] ?? NULL;
+      $menu_parent = $parent_menu_name . ':' . $parent;
+    }
 
     /* Build a select field with all the menus the current user
      * has access to with a unique key
@@ -280,22 +281,22 @@ class TreeWidget extends WidgetBase implements ContainerFactoryPluginInterface {
    * @return array
    *   An array of human-readable menu names, keyed by their menu machine names.
    */
-  public static function getSelectableMenus(FieldItemListInterface $items = NULL) {
+  public function getSelectableMenus(FieldItemListInterface $items = NULL) {
     $menus = [];
     $menu_options = array_map(function ($menu) {
       return $menu->label();
     }, Menu::loadMultiple());
     asort($menu_options);
-    if (!empty($items->getSetting('menu_type_checkbox'))) {
-      $negate = $items->getSetting('menu_type_checkbox_negate') ?? FALSE;
+    if (!empty($this->getFieldSetting('menu_type_checkbox'))) {
+      $negate = $this->getFieldSetting('menu_type_checkbox_negate') ?? FALSE;
       if ($negate) {
-        $menu_selected = array_diff($items->getSetting('menu_type_checkbox'), array_keys($menu_options));
+        $menu_selected = array_diff($this->getFieldSetting('menu_type_checkbox'), array_keys($menu_options));
         $menu_selected = array_intersect_key($menu_options, $menu_selected);
-                        dpm($items->getSetting('menu_type_checkbox'));
+                        dpm($this->getFieldSetting('menu_type_checkbox'));
 
       }
       else {
-        $menu_selected = array_diff($items->getSetting('menu_type_checkbox'), [0]);
+        $menu_selected = array_diff($this->getFieldSetting('menu_type_checkbox'), [0]);
 
         $menu_selected = array_intersect_key($menu_options, $menu_selected);
       }
