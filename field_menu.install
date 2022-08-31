@@ -22,160 +22,43 @@ function field_menu_update_9232() {
   foreach ($all_field_menu_fields as $entity_type => $field) {
     $field_name = array_key_first($field);
 
-    // New column for menu title.
-    $spec_title = [
-      'type' => 'text',
-      'description' => 'Menu title',
-      'not null' => FALSE,
-      'size' => 'tiny',
-    ];
-    $schema->addField($entity_type . '__' . $field_name, $field_name . '_title', $spec_title);
     // New column for selected menu.
     $spec_menu = [
-      'type' => 'text',
-      'description' => 'Selected menu',
-      'not null' => FALSE,
-      'size' => 'tiny',
+      'description' => "The selected menu name.",
+      'type' => 'varchar_ascii',
+      'length' => 32,
+      'not null' => TRUE,
+      'default' => '',
     ];
     $schema->addField($entity_type . '__' . $field_name, $field_name . '_menu', $spec_menu);
-    // New column for starting level.
-    $spec_level = [
-      'type' => 'int',
-      'description' => 'Starting level',
-      'not null' => FALSE,
-      'size' => 'small',
-    ];
-    $schema->addField($entity_type . '__' . $field_name, $field_name . '_level', $spec_level);
-    // New column for depth.
-    $spec_depth = [
-      'type' => 'int',
-      'description' => 'Depth',
-      'not null' => FALSE,
-      'size' => 'small',
-    ];
-    $schema->addField($entity_type . '__' . $field_name, $field_name . '_depth', $spec_depth);
-    // New column for expand all items.
-    $spec_expand_all_items = [
-      'type' => 'int',
-      'description' => 'Expand all items',
-      'not null' => FALSE,
-      'size' => 'tiny',
-    ];
-    $schema->addField($entity_type . '__' . $field_name, $field_name . '_expand_all_items', $spec_expand_all_items);
-    // New column for follow.
-    $spec_follow = [
-      'type' => 'int',
-      'description' => 'Follow',
-      'not null' => FALSE,
-      'size' => 'tiny',
-    ];
-    $schema->addField($entity_type . '__' . $field_name, $field_name . '_follow', $spec_follow);
-    // New column for follow option.
-    $spec_follow_parent = [
-      'type' => 'text',
-      'description' => 'Follow option',
-      'not null' => FALSE,
-      'size' => 'tiny',
-    ];
-    $schema->addField($entity_type . '__' . $field_name, $field_name . '_follow_parent', $spec_follow_parent);
-    // New column for fixed parent.
-    $spec_parent = [
-      'type' => 'text',
-      'description' => 'Fixed parent',
-      'not null' => FALSE,
-      'size' => 'tiny',
-    ];
-    $schema->addField($entity_type . '__' . $field_name, $field_name . '_parent', $spec_parent);
 
-    // New column for render_parent.
-    $spec_render_parent = [
-      'type' => 'int',
-      'description' => 'Render parent menu link',
-      'not null' => FALSE,
-      'size' => 'tiny',
+    // New column for menu options.
+    $spec_options = [
+      'description' => "Includes menu parameters and other options.",
+      'type' => 'blob',
+      'size' => 'big',
+      'serialize' => TRUE,
     ];
-    $schema->addField($entity_type . '__' . $field_name, $field_name . '_render_parent', $spec_render_parent);
+    $schema->addField($entity_type . '__' . $field_name, $field_name . '_options', $spec_options);
 
-    // New revision column for menu title.
-    $spec_title = [
-      'type' => 'text',
-      'description' => 'Menu title',
-      'not null' => FALSE,
-      'size' => 'tiny',
-      'default' => 0,
+
+    // New revision column for menu options.
+    $spec_options_revision = [
+      'description' => 'Menu options',
+      'type' => 'blob',
+      'size' => 'big',
+      'serialize' => TRUE,
     ];
-    $schema->addField($entity_type . '_revision__' . $field_name, $field_name . '_title', $spec_title);
+    $schema->addField($entity_type . '_revision__' . $field_name, $field_name . '_options', $spec_options_revision);
 
     // New revision column for selected menu.
-    $spec_menu = [
+    $spec_menu_revision = [
       'type' => 'text',
       'description' => 'Selected menu',
       'not null' => FALSE,
       'size' => 'tiny',
     ];
-    $schema->addField($entity_type . '_revision__' . $field_name, $field_name . '_menu', $spec_menu);
-
-    // New revision column for starting level.
-    $spec_level = [
-      'type' => 'int',
-      'description' => 'Starting level',
-      'not null' => FALSE,
-      'size' => 'small',
-    ];
-    $schema->addField($entity_type . '_revision__' . $field_name, $field_name . '_level', $spec_level);
-
-    // New revision column for depth.
-    $spec_depth = [
-      'type' => 'int',
-      'description' => 'Depth',
-      'not null' => FALSE,
-      'size' => 'small',
-    ];
-    $schema->addField($entity_type . '_revision__' . $field_name, $field_name . '_depth', $spec_depth);
-
-    // New revision column for expand all items.
-    $spec_expand_all_items = [
-      'type' => 'int',
-      'description' => 'Expand all items',
-      'not null' => FALSE,
-      'size' => 'tiny',
-    ];
-    $schema->addField($entity_type . '_revision__' . $field_name, $field_name . '_expand_all_items', $spec_expand_all_items);
-    // New revision column for follow.
-    $spec_follow = [
-      'type' => 'int',
-      'description' => 'Follow',
-      'not null' => FALSE,
-      'size' => 'tiny',
-    ];
-    $schema->addField($entity_type . '_revision__' . $field_name, $field_name . '_follow', $spec_follow);
-    // New revision column for follow option.
-    $spec_follow_parent = [
-      'type' => 'text',
-      'description' => 'Follow option',
-      'not null' => FALSE,
-      'size' => 'tiny',
-    ];
-    $schema->addField($entity_type . '_revision__' . $field_name, $field_name . '_follow_parent', $spec_follow_parent);
-
-    // New revision column for fixed parent.
-    $spec_parent = [
-      'type' => 'text',
-      'description' => 'Parent menu link',
-      'not null' => FALSE,
-      'size' => 'tiny',
-      'default' => 0,
-    ];
-    $schema->addField($entity_type . '_revision__' . $field_name, $field_name . '_parent', $spec_parent);
-
-    // New revision column for render_parent.
-    $spec_render_parent = [
-      'type' => 'int',
-      'description' => 'Render parent menu link',
-      'not null' => FALSE,
-      'size' => 'tiny',
-    ];
-    $schema->addField($entity_type . '_revision__' . $field_name, $field_name . '_render_parent', $spec_render_parent);
+    $schema->addField($entity_type . '_revision__' . $field_name, $field_name . '_menu', $spec_menu_revision);
 
     // Modify field data.
     $field_query = $database->select($entity_type . '__' . $field_name, 'f');
@@ -200,15 +83,16 @@ function field_menu_update_9232() {
         $field_update_query->condition('revision_id', $row->revision_id);
         $field_update_query->condition('delta', $row->delta);
         $field_update_query->fields([
-          'field_menu_title' => $row->field_menu_menu_title,
           'field_menu_menu' => $row->field_menu_menu,
-          'field_menu_level' => 1,
-          'field_menu_depth' => $row->field_menu_max_depth,
-          'field_menu_expand_all_items' => 1,
-          'field_menu_follow' => 0,
-          'field_menu_follow_parent' => '',
-          'field_menu_parent' => $row->field_menu_menu_item_key,
-          'field_menu_render_parent' => $row->field_menu_include_root,
+          'field_menu_options' => [
+            'title' => $row->field_menu_menu_title,
+            'depth' => $row->field_menu_max_depth,
+            'expand_all_items' => 1,
+            'follow' => 0,
+            'follow_parent' => '',
+            'parent' => $row->field_menu_menu_item_key,
+            'render_parent' => $row->field_menu_include_root,
+          ],
         ]);
         $field_update_query->execute();
 
@@ -236,15 +120,16 @@ function field_menu_update_9232() {
         $field_update_query->condition('revision_id', $row->revision_id);
         $field_update_query->condition('delta', $row->delta);
         $field_update_query->fields([
-          'field_menu_title' => $row->field_menu_menu_title,
           'field_menu_menu' => $row->field_menu_menu,
-          'field_menu_level' => 1,
-          'field_menu_depth' => $row->field_menu_max_depth,
-          'field_menu_expand_all_items' => 1,
-          'field_menu_follow' => 0,
-          'field_menu_follow_parent' => '',
-          'field_menu_parent' => $row->field_menu_menu_item_key,
-          'field_menu_render_parent' => $row->field_menu_include_root,
+          'field_menu_options' => [
+            'title' => $row->field_menu_menu_title,
+            'depth' => $row->field_menu_max_depth,
+            'expand_all_items' => 1,
+            'follow' => 0,
+            'follow_parent' => '',
+            'parent' => $row->field_menu_menu_item_key,
+            'render_parent' => $row->field_menu_include_root,
+          ],
         ]);
         $field_update_query->execute();
       }

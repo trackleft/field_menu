@@ -19,7 +19,7 @@ field.storage_settings.field_menu:
 
 field.field_settings.field_menu:
   type: mapping
-  label: 'Field menu settings'
+  label: 'Menu field settings'
   mapping:
     menu_type_checkbox:
       type: sequence
@@ -36,30 +36,9 @@ field.value.field_menu:
   type: mapping
   label: 'Default value'
   mapping:
-    title:
-      type: string
-      label: 'Menu title'
     menu:
-      type: string
-      label: 'Selected menu'
-    level:
-      type: integer
-      label: 'Starting level'
-    depth:
-      type: integer
-      label: 'Depth'
-    expand_all_items:
-      type: boolean
-      label: 'Expand all items'
-    follow:
-      type: boolean
-      label: 'Follow'
-    follow_parent:
-      type: string
-      label: 'Follow option'
-    parent:
-      type: string
-      label: 'Parent menu link'
-    render_parent:
-      type: boolean
-      label: 'Render parent menu link'
+      type: text
+      label: Selected menu
+    options:
+      type: text
+      label: Menu options

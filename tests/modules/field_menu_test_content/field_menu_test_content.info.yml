@@ -1,0 +1,7 @@
+name: Field Menu Test Content
+type: module
+description: Provides test content to run functional tests against.
+package: Field Menu Test
+core_version_requirement: ^8 || ^9 || ^10
+dependencies:
+  - field_menu:field_menu

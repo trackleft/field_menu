@@ -1,0 +1,7 @@
+name: Field Menu Node Test
+type: module
+description: Test module for field_menu on nodes.
+package: Fields
+core_version_requirement: ^8 || ^9 || ^10
+dependencies:
+  - field_menu:field_menu

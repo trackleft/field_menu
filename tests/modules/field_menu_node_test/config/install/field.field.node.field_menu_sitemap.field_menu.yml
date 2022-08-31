@@ -1,0 +1,28 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.storage.node.field_menu
+    - node.type.field_menu_sitemap
+  module:
+    - field_menu
+id: node.field_menu_sitemap.field_menu
+field_name: field_menu
+entity_type: node
+bundle: field_menu_sitemap
+label: Menu
+description: ''
+required: false
+translatable: false
+default_value: {  }
+default_value_callback: ''
+settings:
+  menu_type_checkbox:
+    account: account
+    admin: admin
+    devel: devel
+    footer: 0
+    main: 0
+    tools: tools
+  menu_type_checkbox_negate: true
+field_type: field_menu

@@ -95,15 +95,16 @@ class MenuTreeFormatter extends FormatterBase implements ContainerFactoryPluginI
     $this->configuration['providing_entity'] = $items->getEntity();
     $this->configuration['view_mode'] = $this->viewMode;
     foreach ($items as $delta => $item) {
+      $options = $item->options;
       // Adjust the menu tree parameters based on the block's configuration.
-      $menu_name = $item->menu;
-      $level = $item->level;
-      $depth = $item->depth;
-      $expand_all_items = $item->expand_all_items;
-      $parent = $item->parent;
-      $render_parent = $item->render_parent;
-      $follow = $item->follow;
-      $follow_parent = $item->follow_parent;
+      $menu_name = $options['menu'];
+      $level = $options['level'];
+      $depth = $options['depth'];
+      $expand_all_items = $options['expand_all_items'];
+      $parent = $options['parent'];
+      $render_parent = $options['render_parent'];
+      $follow = $options['follow'];
+      $follow_parent = $options['follow_parent'];
       $following = FALSE;
       if ($expand_all_items) {
         $menu_parameters = new MenuTreeParameters();

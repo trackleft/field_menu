@@ -4,9 +4,11 @@ namespace Drupal\field_menu\Plugin\Field\FieldType;
 
 use Drupal\Core\Field\FieldItemBase;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
+use Drupal\Core\TypedData\MapDataDefinition;
 use Drupal\Core\TypedData\DataDefinition;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\system\Entity\Menu;
+
 
 /**
  * Plugin implementation of the 'field_menu' field type.
@@ -28,55 +30,18 @@ class MenuItemId extends FieldItemBase {
   public static function schema(FieldStorageDefinitionInterface $field_definition) {
     return [
       'columns' => [
-        'title' => [
-          'type' => 'text',
-          'size' => 'tiny',
-          'not null' => FALSE,
-        ],
         'menu' => [
-          'type' => 'text',
-          'size' => 'tiny',
-          'not null' => FALSE,
+          'description' => "The selected menu name.",
+          'type' => 'varchar_ascii',
+          'length' => 32,
+          'not null' => TRUE,
+          'default' => '',
         ],
-        'follow_parent' => [
-          'type' => 'text',
-          'size' => 'tiny',
-          'not null' => FALSE,
-        ],
-        'level' => [
-          'type' => 'int',
-          'unsigned' => FALSE,
-          'size' => 'small',
-          'not null' => FALSE,
-        ],
-        'depth' => [
-          'type' => 'int',
-          'unsigned' => FALSE,
-          'size' => 'small',
-          'not null' => FALSE,
-        ],
-        'follow' => [
-          'type' => 'int',
-          'unsigned' => FALSE,
-          'size' => 'tiny',
-          'not null' => FALSE,
-        ],
-        'expand_all_items' => [
-          'type' => 'int',
-          'unsigned' => FALSE,
-          'size' => 'tiny',
-          'not null' => FALSE,
-        ],
-        'parent' => [
-          'type' => 'text',
-          'size' => 'tiny',
-          'not null' => FALSE,
-        ],
-        'render_parent' => [
-          'type' => 'int',
-          'unsigned' => FALSE,
-          'size' => 'tiny',
-          'not null' => FALSE,
+        'options' => [
+          'description' => "Includes menu parameters and other options.",
+          'type' => 'blob',
+          'size' => 'big',
+          'serialize' => TRUE,
         ],
       ],
     ];
@@ -101,16 +66,10 @@ class MenuItemId extends FieldItemBase {
    * {@inheritdoc}
    */
   public static function propertyDefinitions(FieldStorageDefinitionInterface $field_definition) {
-    $properties['title'] = DataDefinition::create('string')->setLabel(t('Title'));
-    $properties['menu'] = DataDefinition::create('string')->setLabel('Menu');
-    $properties['follow_parent'] = DataDefinition::create('string')->setLabel('Follow parent');
-    $properties['level'] = DataDefinition::create('integer')->setLabel(t('Level'));
-    $properties['depth'] = DataDefinition::create('integer')->setLabel(t('Depth'));
-    $properties['follow'] = DataDefinition::create('integer')->setLabel('Follow');
-    $properties['expand_all_items'] = DataDefinition::create('integer')->setLabel('Expand all items');
-    $properties['parent'] = DataDefinition::create('string')->setLabel('Parent menu link');
-    $properties['render_parent'] = DataDefinition::create('integer')->setLabel('Render parent menu link');
-
+    $properties['menu'] = DataDefinition::create('string')
+      ->setLabel('Menu');
+    $properties['options'] = MapDataDefinition::create()
+      ->setLabel(t('Menu Options'));
     return $properties;
   }
 
@@ -130,7 +89,10 @@ class MenuItemId extends FieldItemBase {
   public function fieldSettingsForm(array $form, FormStateInterface $form_state) {
 
     $element = [];
-    $menu_options = menu_ui_get_menus();
+
+    $menu_options = array_map(function ($menu) { return $menu->label(); }, Menu::loadMultiple());
+    asort($menu_options);
+
     $default_value = $this->getSetting('menu_type_checkbox') ?? [];
     $element['menu_type_checkbox'] = [
       '#type' => 'checkboxes',

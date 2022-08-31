@@ -1,0 +1,27 @@
+langcode: en
+status: true
+dependencies:
+  config:
+    - field.field.node.field_menu_sitemap.field_menu
+    - node.type.field_menu_sitemap
+  module:
+    - field_menu
+    - user
+id: node.field_menu_sitemap.default
+targetEntityType: node
+bundle: field_menu_sitemap
+mode: default
+content:
+  field_menu:
+    type: field_menu_tree_formatter
+    label: above
+    settings: {  }
+    third_party_settings: {  }
+    weight: 1
+    region: content
+  links:
+    settings: {  }
+    third_party_settings: {  }
+    weight: 0
+    region: content
+hidden: {  }

@@ -66,15 +66,17 @@ class TreeWidget extends WidgetBase implements ContainerFactoryPluginInterface {
    */
   public static function defaultSettings() {
     return [
-      'title' => '',
-      'menu' => '',
-      'parent' => '',
-      'level' => 2,
-      'depth' => 0,
-      'expand_all_items' => FALSE,
-      'follow' => FALSE,
-      'follow_parent' => 'child',
-      'render_parent' => FALSE,
+      'menu' => 'main',
+      'options' => [
+        'title' => '',
+        'parent' => '',
+        'level' => 2,
+        'depth' => 0,
+        'expand_all_items' => FALSE,
+        'follow' => FALSE,
+        'follow_parent' => 'child',
+        'render_parent' => FALSE,
+      ]
     ] + parent::defaultSettings();
   }
 
@@ -89,13 +91,14 @@ class TreeWidget extends WidgetBase implements ContainerFactoryPluginInterface {
         FormStateInterface $form_state
     ) {
     $item = $items[$delta];
+    $options = $item->options;
+    $default_options = $this->getSettings('options');
     $element['title'] = [
       '#type' => 'textfield',
       '#title' => $this->t('Title'),
-      '#default_value' => $item->title ?? $this->getSetting('title'),
+      '#default_value' => $options->title ??  $default_options['title'],
       '#description' => $this->t('Optional title for the menu.'),
     ];
-
     /* Build a select field with all the menus the current user
      * has access to with a unique key
      * (uses the same fuctionality as when a user adds a menu link to a node)
@@ -107,7 +110,7 @@ class TreeWidget extends WidgetBase implements ContainerFactoryPluginInterface {
     $element['menu'] = [
       '#type' => 'select',
       '#title' => $this->t('Menu'),
-      '#default_value' => $item->menu ?? $this->getSetting('menu'),
+      '#default_value' => $options->menu ?? $this->getSetting('menu'),
       '#options' => $menu_options,
       '#description' => $this->t('Select a menu'),
     ];
@@ -116,7 +119,7 @@ class TreeWidget extends WidgetBase implements ContainerFactoryPluginInterface {
       '#type' => 'details',
       '#title' => $this->t('Menu levels'),
       // Open if not set to defaults.
-      '#open' => $this->getSetting('level') !== $item->level || $this->getSetting('depth') !== $items[$delta]->depth,
+      '#open' => $default_options['level'] !== $options->level || $default_options['level'] !== $options->depth,
       '#process' => [[get_class(), 'processMenuLevelParents']],
       '#states' => [
         'visible' => [
@@ -125,25 +128,25 @@ class TreeWidget extends WidgetBase implements ContainerFactoryPluginInterface {
       ],
     ];
 
-    $options = range(0, $this->menuTree->maxDepth());
-    unset($options[0]);
+    $level_options = range(0, $this->menuTree->maxDepth());
+    unset($level_options[0]);
 
     $element['menu_levels']['level'] = [
       '#type' => 'select',
       '#title' => $this->t('Initial visibility level'),
-      '#default_value' => $item->level ?? $this->getSetting('level'),
-      '#options' => $options,
+      '#default_value' => $options->level ?? $default_options['level'],
+      '#options' => $level_options,
       '#description' => $this->t('The menu is only visible if the menu link for the current page is at this level or below it. Use level 1 to always display this menu.'),
       '#required' => TRUE,
     ];
 
-    $options[0] = $this->t('Unlimited');
+     $depth_options[0] = $this->t('Unlimited');
 
     $element['menu_levels']['depth'] = [
       '#type' => 'select',
       '#title' => $this->t('Number of levels to display'),
-      '#default_value' => $item->depth ?? $this->getSetting('depth'),
-      '#options' => $options,
+      '#default_value' => $options->depth ?? $default_options['depth'],
+      '#options' => $depth_options,
       '#description' => $this->t('This maximum number includes the initial level.'),
       '#required' => TRUE,
     ];
@@ -151,7 +154,7 @@ class TreeWidget extends WidgetBase implements ContainerFactoryPluginInterface {
     $element['menu_levels']['expand_all_items'] = [
       '#type' => 'checkbox',
       '#title' => $this->t('Expand all menu links'),
-      '#default_value' => $item->expand_all_items ?? $this->getSetting('expand_all_items'),
+      '#default_value' => $options->expand_all_items ?? $default_options['expand_all_items'],
       '#description' => $this->t('Override the option found on each menu link used for expanding children and instead display the whole menu tree as expanded.'),
     ];
 
@@ -168,7 +171,7 @@ class TreeWidget extends WidgetBase implements ContainerFactoryPluginInterface {
       '#description' => $this->t('Alter the options in “Menu levels” to be relative to the fixed parent item. The block will only contain children of the selected menu link.'),
     ];
 
-    $parent_value = $item->parent ?? $this->getSetting('parent');
+    $parent_value = $item->parent ?? $default_options['parent'];
     // Get existing data from field if there is any.
     $parent_arr = explode(':', $parent_value);
     $parent_menu_name = $parent_arr[0] ?? NULL;
@@ -216,7 +219,7 @@ class TreeWidget extends WidgetBase implements ContainerFactoryPluginInterface {
           [
             [':input[name="settings[level]"]' => ['!value' => 1]],
             'or',
-            [':input[name="settings[parent]"]' => ['!value' => $this->getSetting('menu') . ':']],
+            [':input[name="settings[parent]"]' => ['!value' => $default_options['menu'] . ':']],
           ],
         ],
         // Ideally, we would uncheck the setting when it's not visible, but that won't work until
@@ -228,7 +231,7 @@ class TreeWidget extends WidgetBase implements ContainerFactoryPluginInterface {
     $element['advanced']['follow'] = [
       '#type' => 'checkbox',
       '#title' => $this->t('<strong>Make the initial visibility level follow the active menu item.</strong>'),
-      '#default_value' => $item->follow ?? $items->getSetting('follow') ?? FALSE,
+      '#default_value' => $item->follow ?? $default_options['follow'] ?? FALSE,
       '#description' => $this->t('If the active menu item is deeper than the initial visibility level set above, the initial visibility level will be relative to the active menu item. Otherwise, the initial visibility level of the tree will remain fixed.'),
       '#attributes' => [
         //define static name so we can easier select it
@@ -240,7 +243,7 @@ class TreeWidget extends WidgetBase implements ContainerFactoryPluginInterface {
       '#type' => 'radios',
       '#title' => $this->t('Initial visibility level will be'),
       '#description' => $this->t('When following the active menu item, select whether the initial visibility level should be set to the active menu item, or its children.'),
-      '#default_value' => $item->follow_parent ??  $items->getSetting('follow_parent') ?? FALSE,
+      '#default_value' => $item->follow_parent ??  $default_options['follow_parent'] ?? FALSE,
       '#options' => [
         'active' => $this->t('Active menu item'),
         'child' => $this->t('Children of active menu item'),
@@ -277,21 +280,23 @@ class TreeWidget extends WidgetBase implements ContainerFactoryPluginInterface {
    * @return array
    *   An array of human-readable menu names, keyed by their menu machine names.
    */
-  public static function getSelectableMenus(FieldItemListInterface $items) {
+  public static function getSelectableMenus(FieldItemListInterface $items = NULL) {
     $menus = [];
     $menu_options = array_map(function ($menu) {
       return $menu->label();
     }, Menu::loadMultiple());
     asort($menu_options);
-
     if (!empty($items->getSetting('menu_type_checkbox'))) {
       $negate = $items->getSetting('menu_type_checkbox_negate') ?? FALSE;
       if ($negate) {
         $menu_selected = array_diff($items->getSetting('menu_type_checkbox'), array_keys($menu_options));
         $menu_selected = array_intersect_key($menu_options, $menu_selected);
+                        dpm($items->getSetting('menu_type_checkbox'));
+
       }
       else {
         $menu_selected = array_diff($items->getSetting('menu_type_checkbox'), [0]);
+
         $menu_selected = array_intersect_key($menu_options, $menu_selected);
       }
       $menus = empty($menu_selected) ? $menu_options : $menu_selected;
@@ -324,6 +329,7 @@ class TreeWidget extends WidgetBase implements ContainerFactoryPluginInterface {
    * Validate the Menu item Key field.
    */
   public function validate($element, FormStateInterface $form_state) {
+
     $menu = $element['menu']['#value'] ?? '';
     if (strlen($menu) === 0) {
       $form_state->setValueForElement($element['menu'], '');
@@ -331,6 +337,28 @@ class TreeWidget extends WidgetBase implements ContainerFactoryPluginInterface {
         $form_state->setError($element['menu'], $this->t("You must select a menu item if you have set a title"));
       }
     }
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function massageFormValues(array $values, array $form, FormStateInterface $form_state) {
+    foreach ($values as $delta => $value) {
+
+      if (!empty($value['options']) || !empty($value['menu'])) {
+        $values[$delta]['options'] = [
+          'title' => $value['title'],
+          'level' => $value['level'],
+          'depth' => $value['depth'],
+          'expand_all_items' => $value['expand_all_items'],
+          'follow' => $value['follow'],
+          'follow_parent' => $value['follow_parent'],
+          'parent:' => $value['parent:'],
+          'render_parent' => $value['render_parent'],
+        ];
+      }
+    }
+    return $values;
   }
 
 }
